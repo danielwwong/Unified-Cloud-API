@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Initialize</title>
+	</head>
+	<body>
+		<h1>Initialization</h1>
+		{% if information %}
+		<p>Successfully got initialization information!</p>
+		{% endif %}
+		<form action="/initialize/" method="POST">
+			Google Project ID:<br>
+			<input type="text" name="google_project_id"><br>
+			Azure Storage Account Name:<br>
+			<input type="text" name="azure_account_name"><br>
+			Azure Storage Account Key:<br>
+			<input type="password" name="azure_account_key"><br>
+			AWS Access Key ID:<br>
+			<input type="password" name="s3_access_key_id"><br>
+			AWS Secret Access Key:<br>
+			<input type="password" name="s3_secret_access_key"><br>
+			<input type="submit" value="Initialize">
+		</form>
+	</body>
+</html>

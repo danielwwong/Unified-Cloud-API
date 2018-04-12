@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<!-- <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+		<title>UploadAjax</title>
+		<script type="text/javascript">
+			function UploadFile() {
+				// get bucket/container name
+				var g_bucket = document.getElementsByName("google_upload_bucket")[0].value;
+				var a_container = document.getElementsByName("azure_upload_container")[0].value;
+				var a_bucket = document.getElementsByName("aws_upload_bucket")[0].value;
+				// get file element
+				var fileObj = document.getElementById("file_path").files[0];
+				// upload controller
+				var FileController = "/upload/";
+				// FormData
+				var form = new FormData();
+				form.append("google_upload_bucket", g_bucket)
+				form.append("azure_upload_container", a_container)
+				form.append("aws_upload_bucket", a_bucket)
+				form.append("file_path", fileObj);
+				// XMLHttpRequest
+				var xhr = new XMLHttpRequest();
+				xhr.open("post", FileController, true);
+				xhr.upload.addEventListener("progress", progressFunction, false);
+				xhr.send(form);
+			}
+			function progressFunction(evt) {
+				var progressBar = document.getElementById("progressBar");
+				var percentageDiv = document.getElementById("percentage");
+				if (evt.lengthComputable) {
+					progressBar.max = evt.total;
+					progressBar.value = evt.loaded;
+					percentageDiv.innerHTML = Math.round(evt.loaded / evt.total * 100) + "%";
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Upload</h1>
+		Google Bucket:<br>
+		<input type="text" name="google_upload_bucket"><br>
+		Azure Container:<br>
+		<input type="text" name="azure_upload_container"><br>
+		AWS Bucket:<br>
+		<input type="text" name="aws_upload_bucket"><br>
+		Select File:<br>
+		<input type="file" id="file_path">
+		<br><br>
+		<input type="button" onclick="UploadFile()" value="Upload">
+		<progress id="progressBar" value="0" max="100"></progress>
+		<span id="percentage"></span>
+	</body>
+</html>
