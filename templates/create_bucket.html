@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Create Bucket/Container</title>
+	</head>
+	<body>
+		<h1>Create Bucket/Container</h1>
+		{% if status %}
+		<p>
+			{% if google %}
+			{{ google|safe }}<br>
+			{% endif %}
+			{% if azure %}
+			{{ azure|safe }}<br>
+			{% endif %}
+			{% if aws %}
+			{{ aws|safe }}<br>
+			{% endif %}
+		</p>
+		{% endif %}
+		<form action="/create_bucket/" method="POST">
+			<input type="checkbox" name="google_platform" id="check_google"><label for="check_google">Google Bucket Name:</label><br>
+			<input type="text" name="google_bucket_name" onclick="getElementById('check_google').checked=true"><br>
+			<input type="checkbox" name="azure_platform" id="check_azure"><label for="check_azure">Azure Container Name:</label><br>
+			<input type="text" name="azure_container_name" onclick="getElementById('check_azure').checked=true"><br>
+			<input type="checkbox" name="aws_platform" id="check_aws"><label for="check_aws">AWS Bucket Name:</label><br>
+			<input type="text" name="aws_bucket_name" onclick="getElementById('check_aws').checked=true"><br>
+			<input type="submit" value="Create">
+		</form>
+	</body>
+</html>

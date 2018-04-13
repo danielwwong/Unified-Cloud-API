@@ -40,6 +40,49 @@ def initialize():
     else:
         return render_template('initialize.html')
 
+@app.route('/create_bucket/', methods = ['GET', 'POST'])
+def create_bucket():
+    if request.method == 'POST':
+        google_bucket_name = request.form['google_bucket_name']
+        azure_container_name = request.form['azure_container_name']
+        aws_bucket_name = request.form['aws_bucket_name']
+        google_platform_check = request.form.get('google_platform')
+        azure_platform_check = request.form.get('azure_platform')
+        aws_platform_check = request.form.get('aws_platform')
+        # Google
+        google_info = ''
+        if google_platform_check == 'on':
+            try:
+                uri = boto.storage_uri(google_bucket_name, google_storage) # instantiate a BucketStorageUri object
+                uri.create_bucket(headers = google_header_values)
+                google_info = 'Successfully Created Google Bucket ' + google_bucket_name
+            except Exception as g_e:
+                google_info = 'Failed to Create Google Bucket: ' + str(g_e)
+        # Azure
+        azure_info = ''
+        if azure_platform_check == 'on':
+            try:
+                azure.create_container(azure_container_name, public_access = PublicAccess.Container)
+                # the second parameter makes the container accessible to public
+                azure_info = 'Successfully Created Azure Container ' + azure_container_name
+            except Exception as m_e:
+                azure_info = 'Failed to Create Azure Container: ' + str(m_e)
+        # AWS
+        aws_info = ''
+        if aws_platform_check == 'on':
+            try:
+                s3.create_bucket(Bucket = aws_bucket_name)
+                # the AWS bucket will be hosted in N. Virginia
+                bucket = s3.Bucket(aws_bucket_name)
+                bucket.Acl().put(ACL='public-read')
+                # make the bucket and blobs public readable
+                aws_info = 'Successfully Created AWS Bucket ' + aws_bucket_name
+            except Exception as a_e:
+                aws_info = 'Failed to Create AWS Bucket: ' + str(a_e)
+        flag = 1
+        return render_template('create_bucket.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+    else:
+        return render_template('create_bucket.html')
 
 @app.route('/upload/', methods = ['POST'])
 def upload():
