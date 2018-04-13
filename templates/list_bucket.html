@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>List Buckets/Containers</title>
+	</head>
+	<body>
+		<h1>List Buckets/Containers</h1>
+		<form action="/list_bucket/" method="POST">
+			<input type="checkbox" name="google_platform" id="check_google"><label for="check_google">Google Cloud Storage Buckets</label><br>
+			<input type="checkbox" name="azure_platform" id="check_azure"><label for="check_azure">Microsoft Azure Containers</label><br>
+			<input type="checkbox" name="aws_platform" id="check_aws"><label for="check_aws">Amazon S3 Buckets</label><br>
+			<input type="submit" value="Check">
+		</form>
+		{% if status %}
+		<p>
+			{% if google %}
+			{{ google|safe }}
+			{% endif %}
+			{% if azure %}
+			{{ azure|safe }}
+			{% endif %}
+			{% if aws %}
+			{{ aws|safe }}
+			{% endif %}
+		</p>
+		{% endif %}
+	</body>
+</html>

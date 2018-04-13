@@ -84,6 +84,39 @@ def create_bucket():
     else:
         return render_template('create_bucket.html')
 
+@app.route('/list_bucket/', methods = ['GET', 'POST'])
+def list_bucket():
+    if request.method == 'POST':
+        google_platform_check = request.form.get('google_platform')
+        azure_platform_check = request.form.get('azure_platform')
+        aws_platform_check = request.form.get('aws_platform')
+        # Google
+        google_info = ''
+        if google_platform_check == 'on':
+            uri = boto.storage_uri('', google_storage)
+            google_info = 'Google Buckets:<br>'
+            for bucket in uri.get_all_buckets(headers = google_header_values):
+                google_info = google_info + str(bucket.name) + '<br>'
+        # Azure
+        azure_info = ''
+        if azure_platform_check == 'on':
+            container_list = azure.list_containers()
+            azure_info = 'Azure Containers:<br>'
+            for container in container_list:
+                azure_info = azure_info + str(container.name) + '<br>'
+        # AWS
+        aws_info = ''
+        if aws_platform_check == 'on':
+            response = s3_client.list_buckets()
+            buckets = [bucket['Name'] for bucket in response['Buckets']]
+            aws_info = 'AWS Buckets:<br>'
+            for item in buckets:
+                aws_info = aws_info + str(item) + '<br>'
+        flag = 1
+        return render_template('list_bucket.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+    else:
+        return render_template('list_bucket.html')
+
 @app.route('/upload/', methods = ['POST'])
 def upload():
     f = request.files['file_path']
