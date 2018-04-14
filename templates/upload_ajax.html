@@ -52,9 +52,25 @@
 				xhr.open("post", FileController, true);
 				xhr.onload = function () {
 					// return messages
+					if (check_encrypt == "on") {
+						var links = ["/download_keys/private/", "/download_keys/public/"];
+						var download_names = ["rsa_private_key.bin", "rsa_public_key.pem"];
+						download(links, download_names);
+					}
         };
 				xhr.upload.addEventListener("progress", progressFunction, false);
 				xhr.send(form);
+			}
+			function download(name, download_name) {
+				var element = document.createElement("a");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				for (var i = 0; i < name.length; i++) {
+					element.setAttribute("href", name[i]);
+					element.setAttribute("download", download_name[i]);
+					element.click();
+				}
+				document.body.removeChild(element);
 			}
 			function progressFunction(evt) {
 				var progressBar = document.getElementById("progressBar");

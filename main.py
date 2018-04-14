@@ -59,9 +59,9 @@ def upload():
     # encryption
     if check_encrypt == 'on':
         # RSA public/private key generation
-        custom_api.rsa_key(password, backup_file_folder)
+        custom_api.rsa_key(password)
         # encrypt file
-        custom_api.encrypt_file(backup_file_path, backup_file_folder)
+        custom_api.encrypt_file(backup_file_path)
     # upload
     custom_api.upload_object(backup_file_path, f, google_upload_bucket, azure_upload_container, aws_upload_bucket)
     return render_template('upload_ajax.html')
@@ -69,6 +69,14 @@ def upload():
 @app.route('/upload_ajax/')
 def upload_ajax():
     return render_template('upload_ajax.html')
+
+@app.route('/download_keys/private/', methods = ['GET'])
+def download_private_key():
+    return app.send_static_file('temp/rsa_private_key.bin')
+
+@app.route('/download_keys/public/', methods = ['GET'])
+def download_public_key():
+    return app.send_static_file('temp/rsa_public_key.pem')
 
 if __name__ == '__main__':
     app.run(debug = True)

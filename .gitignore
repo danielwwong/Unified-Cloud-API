@@ -1,6 +1,10 @@
 
 *.p12
 
+*.bin
+
+*.pem
+
 *.pyc
 
 /virtual
