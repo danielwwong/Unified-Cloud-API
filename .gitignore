@@ -1,6 +1,8 @@
 
 *.p12
 
+*.pyc
+
 /virtual
 
 .DS_Store
