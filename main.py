@@ -13,9 +13,9 @@ import getpass
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
-#from werkzeug import secure_filename
 
 app = Flask(__name__)
+backup_file_folder = '/Users/danielwong/'
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
@@ -123,9 +123,51 @@ def upload():
     google_upload_bucket = request.form['google_upload_bucket']
     azure_upload_container = request.form['azure_upload_container']
     aws_upload_bucket = request.form['aws_upload_bucket']
+    check_encrypt = request.form.get('encryption_check')
+    password = request.form['input_password']
     # add a '.' in front of filename to hide the file in macOS
-    backup_file_path = '/Users/danielwong/' + f.filename
+    backup_file_path = backup_file_folder + f.filename
     f.save(backup_file_path)
+    
+    # encryption
+    if check_encrypt == 'on':
+        # RSA public/private key generation
+        key = RSA.generate(2048)
+        encrypted_key = key.export_key(passphrase = password, pkcs = 8, protection = "scryptAndAES128-CBC")
+        # private key
+        with open(backup_file_folder + 'rsa_private_key.bin', 'wb') as file_out:
+            file_out.write(encrypted_key)
+        file_out.close()
+        # public key
+        with open(backup_file_folder + 'rsa_private_key.bin', 'rb') as encoded_key:
+            key_2 = RSA.import_key(encoded_key, passphrase = password)
+            with open(backup_file_folder + 'rsa_public_key.pem', 'wb') as file_out_2:
+                file_out_2.write(key_2.publickey().export_key())
+            file_out_2.close()
+        encoded_key.close()
+        # encrypt file
+        data = ''
+        with open(backup_file_path, 'rb') as file_read:
+            data = file_read.read()
+        file_read.close()
+        with open(backup_file_path, 'wb') as file_output:
+            recipient_key = RSA.import_key(open(backup_file_folder + 'rsa_public_key.pem').read())
+            session_key = get_random_bytes(16)
+            # encrypt the session key with the public RSA key
+            cipher_rsa = PKCS1_OAEP.new(recipient_key)
+            enc_session_key = cipher_rsa.encrypt(session_key)
+            # encrypt the data with the AES session key
+            cipher_aes = AES.new(session_key, AES.MODE_EAX)
+            ciphertext, tag = cipher_aes.encrypt_and_digest(data)
+            # write the encrypted data back to file
+            file_output.write(enc_session_key)
+            file_output.write(cipher_aes.nonce)
+            file_output.write(tag)
+            file_output.write(ciphertext)
+        file_output.close()
+        # print 'Successfully Encrypted "%s"' % backup_file_path
+    
+    # upload
     # Google
     with open(backup_file_path, 'r') as google_file:
         dst_uri = boto.storage_uri(google_upload_bucket + '/' + f.filename, google_storage)
