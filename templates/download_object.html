@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Download Object</title>
+	</head>
+	<body>
+		<h1>Download</h1>
+		<form action="/download/" method="POST">
+			<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
+			<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
+			<input type="radio" name="platform" id="check_aws" value="AWS"><label for="check_aws">Amazon S3</label><br>
+			Bucket/Container Name: <input type="text" name="file_source_bucket"><br>
+			Download Object Name: <input type="text" name="download_file"><br>
+			<input type="submit" value="Download">
+		</form>
+		{% if information %}
+		<p>
+			{{ information }}
+		</p>
+		{% endif %}
+	</body>
+</html>

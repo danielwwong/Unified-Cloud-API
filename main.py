@@ -93,5 +93,16 @@ def list_object():
     else:
         return render_template('list_object.html')
 
+@app.route('/download/', methods = ['GET', 'POST'])
+def download_object():
+    if request.method == 'POST':
+        platform = request.form['platform']
+        file_source_bucket = request.form['file_source_bucket']
+        download_file = request.form['download_file']
+        info = custom_api.download_object(platform, file_source_bucket, backup_file_folder, download_file)
+        return render_template('download_object.html', information = info)
+    else:
+        return render_template('download_object.html')
+
 if __name__ == '__main__':
     app.run(debug = True)
