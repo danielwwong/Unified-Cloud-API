@@ -78,5 +78,20 @@ def download_private_key():
 def download_public_key():
     return app.send_static_file('temp/rsa_public_key.pem')
 
+@app.route('/list_object/', methods = ['GET', 'POST'])
+def list_object():
+    if request.method == 'POST':
+        google_bucket_name = request.form['google_bucket_name']
+        azure_container_name = request.form['azure_container_name']
+        aws_bucket_name = request.form['aws_bucket_name']
+        google_platform_check = request.form.get('google_platform')
+        azure_platform_check = request.form.get('azure_platform')
+        aws_platform_check = request.form.get('aws_platform')
+        google_info, azure_info, aws_info = custom_api.list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check)
+        flag = 1
+        return render_template('list_object.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+    else:
+        return render_template('list_object.html')
+
 if __name__ == '__main__':
     app.run(debug = True)

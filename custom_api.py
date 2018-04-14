@@ -140,3 +140,24 @@ def upload_object(backup_file_path, f, google_upload_bucket, azure_upload_contai
     # print 'Successfully Uploaded "%s/%s" to AWS' % (aws_upload_bucket, f.filename)
     aws_file.close()
     return None
+
+def list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
+    # Google
+    google_info = ''
+    if google_platform_check == 'on':
+        uri = boto.storage_uri(google_bucket_name, google_storage)
+        for g_obj in uri.get_bucket():
+            google_info = google_info + 'Google://' + str(uri.bucket_name) + '/' + str(g_obj.name) + '<br>'
+    # Azure
+    azure_info = ''
+    if azure_platform_check == 'on':
+        generator = azure.list_blobs(azure_container_name)
+        for blob in generator:
+            azure_info = azure_info + 'Azure://' + str(azure_container_name) + '/' + str(blob.name) + '<br>'
+    # AWS
+    aws_info = ''
+    if aws_platform_check == 'on':
+        bucket = s3.Bucket(aws_bucket_name)
+        for a_obj in bucket.objects.all():
+            aws_info = aws_info + 'AWS://' + str(a_obj.bucket_name) + '/' + str(a_obj.key) + '<br>'
+    return google_info, azure_info, aws_info
