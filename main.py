@@ -107,7 +107,7 @@ def download():
     info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
     # decryption
     if check_decrypt == 'on':
-        custom_api.decrypt_file(file_path, password)
+        info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file)
     return info
 
 @app.route('/download_ajax/')
