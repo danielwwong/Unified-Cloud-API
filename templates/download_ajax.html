@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Download Object</title>
+		<script type="text/javascript">
+			function InsertInput(checkbox) {
+				if (checkbox.checked) {
+					var input = document.createElement("input");
+					input.type = "password";
+					input.id = "input_password";
+					var div = document.createElement("div");
+					div.id = "input_password_text";
+					div.innerHTML = "Password for Decryption: ";
+					document.getElementById("dynamic_input").appendChild(div);
+					document.getElementById("dynamic_input").appendChild(input);
+				}
+				else {
+					document.getElementById("input_password_text").remove();
+					document.getElementById("input_password").remove();
+				}
+			}
+			function DownloadFile() {
+				// get inputs
+				var platform_list = document.getElementsByName("platform");
+				for (var i = 0; i < platform_list.length; i++) {
+					if (platform_list[i].checked) {
+						var platform = platform_list[i].value;
+						break;
+					}
+				}
+				var file_source_bucket = document.getElementsByName("file_source_bucket")[0].value;
+				var download_file = document.getElementsByName("download_file")[0].value;
+				var check = document.getElementsByName("decryption_check")[0];
+				if (check.checked) {
+					var check_decrypt = "on";
+				}
+				else {
+					var check_decrypt = "None";
+				}
+				if (check_decrypt == "on") {
+					var password = document.getElementById("input_password").value;
+				}
+				// download controller
+				var FileController = "/download/";
+				// FormData
+				var form = new FormData();
+				form.append("platform", platform);
+				form.append("file_source_bucket", file_source_bucket);
+				form.append("download_file", download_file);
+				form.append("decryption_check", check_decrypt);
+				form.append("input_password", password);
+				// XMLHttpRequest
+				var xhr = new XMLHttpRequest();
+				xhr.open("post", FileController, true);
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						information.innerHTML = this.responseText;
+						var link = "/download_files/" + download_file;
+						download(link, download_file);
+					}
+					else {
+						information.innerHTML = "Running...";
+					}
+				}
+				xhr.send(form);
+			}
+			function download(name, download_name) {
+				var element = document.createElement("a");
+				element.style.display = 'none';
+				document.body.appendChild(element);
+				element.setAttribute("href", name);
+				element.setAttribute("download", download_name);
+				element.click();
+				document.body.removeChild(element);
+			}
+		</script>
+	</head>
+	<body>
+		<h1>Download</h1>
+		<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
+		<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
+		<input type="radio" name="platform" id="check_aws" value="AWS"><label for="check_aws">Amazon S3</label><br>
+		Bucket/Container Name: <input type="text" name="file_source_bucket"><br>
+		Download Object Name: <input type="text" name="download_file"><br>
+		<input type="checkbox" name="decryption_check" id="if_decryption" onclick="InsertInput(this);" checked><label for="if_decryption">Decrypt</label>
+		<div id="dynamic_input"></div>
+		<script type="text/javascript">
+			InsertInput(document.getElementById("if_decryption"));
+		</script>
+		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
+		<div id="information"></div>
+	</body>
+</html>

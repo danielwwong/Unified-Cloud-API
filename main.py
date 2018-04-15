@@ -3,6 +3,7 @@ import custom_api
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
+temp_file_folder = 'static/temp/'
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
@@ -93,16 +94,29 @@ def list_object():
     else:
         return render_template('list_object.html')
 
-@app.route('/download/', methods = ['GET', 'POST'])
-def download_object():
-    if request.method == 'POST':
-        platform = request.form['platform']
-        file_source_bucket = request.form['file_source_bucket']
-        download_file = request.form['download_file']
-        info = custom_api.download_object(platform, file_source_bucket, backup_file_folder, download_file)
-        return render_template('download_object.html', information = info)
-    else:
-        return render_template('download_object.html')
+@app.route('/download/', methods = ['POST'])
+def download():
+    platform = request.form['platform']
+    file_source_bucket = request.form['file_source_bucket']
+    download_file = request.form['download_file']
+    check_decrypt = request.form.get('decryption_check')
+    password = request.form['input_password']
+    # add a '.' in front of filename to hide the file in macOS
+    file_path = temp_file_folder + download_file
+    # download
+    info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
+    # decryption
+    if check_decrypt == 'on':
+        custom_api.decrypt_file(file_path, password)
+    return info
+
+@app.route('/download_ajax/')
+def download_ajax():
+    return render_template('download_ajax.html')
+
+@app.route('/download_files/<filename>', methods = ['GET'])
+def download_files(filename):
+    return app.send_static_file('temp/' + filename)
 
 if __name__ == '__main__':
     app.run(debug = True)

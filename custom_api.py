@@ -123,6 +123,24 @@ def encrypt_file(backup_file_path):
     # print 'Successfully Encrypted "%s"' % backup_file_path
     return None
 
+def decrypt_file(file_path, password):
+    with open(file_path, 'rb') as f:
+        private_key = RSA.import_key(open('static/temp/rsa_private_key.bin').read(), passphrase = password)
+        enc_session_key, nonce, tag, ciphertext = [f.read(x) for x in (private_key.size_in_bytes(), 16, 16, -1)]
+        # decrypt the session key with the private RSA key
+        cipher_rsa = PKCS1_OAEP.new(private_key)
+        session_key = cipher_rsa.decrypt(enc_session_key)
+        # decrypt the data with the AES session key
+        cipher_aes = AES.new(session_key, AES.MODE_EAX, nonce)
+        data = cipher_aes.decrypt_and_verify(ciphertext, tag)
+    f.close()
+    # write the decrypted data back to file
+    with open(file_path, 'wb') as o:
+        o.write(data)
+    o.close()
+    # print 'Successfully Decrypted "%s"' % filepath
+    return None
+
 def upload_object(backup_file_path, f, google_upload_bucket, azure_upload_container, aws_upload_bucket):
     # Google
     with open(backup_file_path, 'r') as google_file:
