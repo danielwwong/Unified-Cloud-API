@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
+{% extends 'base.html' %}
+{% block head %}
 		<title>List Buckets/Containers</title>
-	</head>
-	<body>
+{% endblock %}
+{% block body %}
 		<h1>List Buckets/Containers</h1>
 		<form action="/list_bucket/" method="POST">
 			<input type="checkbox" name="google_platform" id="check_google"><label for="check_google">Google Cloud Storage Buckets</label><br>
@@ -25,5 +23,4 @@
 			{% endif %}
 		</p>
 		{% endif %}
-	</body>
-</html>
+{% endblock %}

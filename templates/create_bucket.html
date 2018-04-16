@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
+{% extends 'base.html' %}
+{% block head %}
 		<title>Create Bucket/Container</title>
-	</head>
-	<body>
+{% endblock %}
+{% block body %}
 		<h1>Create Bucket/Container</h1>
 		<form action="/create_bucket/" method="POST">
 			<input type="checkbox" name="google_platform" id="check_google"><label for="check_google">Google Bucket Name:</label><br>
@@ -28,5 +26,4 @@
 			{% endif %}
 		</p>
 		{% endif %}
-	</body>
-</html>
+{% endblock %}

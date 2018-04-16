@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
+{% extends 'base.html' %}
+{% block head %}
 		<title>Download Object</title>
 		<script type="text/javascript">
 			function InsertInput(checkbox) {
@@ -75,8 +73,8 @@
 				document.body.removeChild(element);
 			}
 		</script>
-	</head>
-	<body>
+{% endblock %}
+{% block body %}
 		<h1>Download</h1>
 		<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
 		<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
@@ -90,5 +88,4 @@
 		</script>
 		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
 		<div id="information"></div>
-	</body>
-</html>
+{% endblock %}

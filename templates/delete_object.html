@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<meta charset="UTF-8">
+{% extends 'base.html' %}
+{% block head %}
 		<title>Delete Object</title>
-	</head>
-	<body>
+{% endblock %}
+{% block body %}
 		<h1>Delete Object</h1>
 		<form action="/delete/" method="POST">
 			<input type="checkbox" name="google_platform" id="check_google"><label for="check_google">Google Bucket Name: </label>
@@ -31,5 +29,4 @@
 			{% endif %}
 		</p>
 		{% endif %}
-	</body>
-</html>
+{% endblock %}
