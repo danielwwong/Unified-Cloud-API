@@ -64,7 +64,7 @@ def upload():
         # encrypt file
         custom_api.encrypt_file(backup_file_path)
     # upload
-    custom_api.upload_object(backup_file_path, f, google_upload_bucket, azure_upload_container, aws_upload_bucket)
+    custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
     return render_template('upload_ajax.html')
 
 @app.route('/upload_ajax/')
