@@ -13,9 +13,9 @@ def initialize():
         azure_account_key = request.form['azure_account_key']
         s3_access_key_id = request.form['s3_access_key_id']
         s3_secret_access_key = request.form['s3_secret_access_key']
-        custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
-        info = 1
-        return render_template('initialize.html', information = info)
+        google_info, azure_info, aws_info = custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
+        flag = 1
+        return render_template('initialize.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
     else:
         return render_template('initialize.html')
 

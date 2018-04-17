@@ -12,19 +12,44 @@ import getpass
 from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
+import base64
 
 def initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key):
     global google_storage, local_file, google_header_values, azure, s3, s3_client
     # Google
-    google_storage = 'gs' # URI scheme for Google Cloud Storage
-    local_file = 'file' # URI scheme for accessing local files
-    google_header_values = {'x-goog-project-id': google_project_id}
+    google_info = ''
+    try:
+        google_storage = 'gs' # URI scheme for Google Cloud Storage
+        local_file = 'file' # URI scheme for accessing local files
+        google_header_values = {'x-goog-project-id': google_project_id}
+        # test list buckets
+        uri = boto.storage_uri('', google_storage)
+        uri.get_all_buckets(headers = google_header_values)
+        google_info = 'Successfully Initialized Google Cloud Storage!'
+    except Exception as g_e:
+        google_info = 'Failed to Initialize Google Cloud Storage!</p><p>' + str(g_e)
     # Azure
-    azure = BlockBlobService(account_name = azure_account_name, account_key = azure_account_key)
+    azure_info = ''
+    try:
+        azure = BlockBlobService(account_name = azure_account_name, account_key = azure_account_key)
+        # test if account_key is base64
+        base64.decodestring(azure_account_key)
+        # test list containers
+        container_list = azure.list_containers()
+        azure_info = 'Successfully Initialized Microsoft Azure!'
+    except Exception as m_e:
+        azure_info = 'Failed to Initialize Microsoft Azure!</p><p>' + str(m_e)
     # AWS
-    s3 = boto3.resource('s3', aws_access_key_id = s3_access_key_id, aws_secret_access_key = s3_secret_access_key)
-    s3_client = boto3.client('s3', aws_access_key_id = s3_access_key_id, aws_secret_access_key = s3_secret_access_key)
-    return None
+    aws_info = ''
+    try:
+        s3 = boto3.resource('s3', aws_access_key_id = s3_access_key_id, aws_secret_access_key = s3_secret_access_key)
+        s3_client = boto3.client('s3', aws_access_key_id = s3_access_key_id, aws_secret_access_key = s3_secret_access_key)
+        # test list buckets
+        s3_client.list_buckets()
+        aws_info = 'Successfully Initialized Amazon S3!'
+    except Exception as a_e:
+        aws_info = 'Failed to Initialize Amazon S3!</p><p>' + str(a_e)
+    return google_info, azure_info, aws_info
 
 def create_bucket(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
