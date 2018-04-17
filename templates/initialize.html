@@ -4,21 +4,28 @@
 {% endblock %}
 {% block initialize_button %}w3-light-blue{% endblock %}
 {% block body %}
-		<h1>Initialization</h1>
+		<div class="w3-card-4 w3-light-gray" style="width:80%">
+			<div class="w3-container w3-blue">
+				<h3>Initialization</h3>
+			</div>
+			<form class="w3-container" action="/initialize/" method="POST">
+				<p><b>Google Project ID:</b>
+				<input class="w3-input" type="text" name="google_project_id"></p>
+				<p><b>Azure Storage Account Name:</b>
+				<input class="w3-input" type="text" name="azure_account_name"></p>
+				<p><b>Azure Storage Account Key:</b>
+				<input class="w3-input" type="password" name="azure_account_key"></p>
+				<p><b>AWS Access Key ID:</b>
+				<input class="w3-input" type="password" name="s3_access_key_id"></p>
+				<p><b>AWS Secret Access Key:</b>
+				<input class="w3-input" type="password" name="s3_secret_access_key"></p>
+				<p><input class="w3-button w3-blue w3-hover-light-blue w3-ripple" type="submit" value="Initialize"></p>
+			</form>
+		</div>
 		{% if information %}
-		<p>Successfully got initialization information!</p>
+		<div class="w3-panel w3-green w3-card-4" style="width:80%">
+			<h3>Success!</h3>
+			<p>Successfully got initialization information!</p>
+		</div>
 		{% endif %}
-		<form action="/initialize/" method="POST">
-			Google Project ID:<br>
-			<input type="text" name="google_project_id"><br>
-			Azure Storage Account Name:<br>
-			<input type="text" name="azure_account_name"><br>
-			Azure Storage Account Key:<br>
-			<input type="password" name="azure_account_key"><br>
-			AWS Access Key ID:<br>
-			<input type="password" name="s3_access_key_id"><br>
-			AWS Secret Access Key:<br>
-			<input type="password" name="s3_secret_access_key"><br>
-			<input type="submit" value="Initialize">
-		</form>
 {% endblock %}
