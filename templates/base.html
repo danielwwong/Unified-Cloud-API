@@ -9,10 +9,26 @@
 		<link rel="mask-icon" href="{{ url_for('static', filename='favicon/safari-pinned-tab.svg') }}" color="#5bbad5">
 		<meta name="msapplication-TileColor" content="#2d89ef">
 		<meta name="theme-color" content="#ffffff">
+		<link rel="stylesheet" href="{{ url_for('static', filename='css/w3.css')}}">
 		{% block head %}
 		{% endblock %}
 	</head>
 	<body>
+		<div class="w3-container">
+			<h2>
+				<img src="{{ url_for('static', filename='img/logo.png') }}" alt="logo" style="max-width:32px">
+				Unified Cloud
+			</h2>
+		</div>
+		<div class="w3-bar w3-blue w3-card-4">
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block initialize_button %}{% endblock %}" style="width:14.28%" href="/initialize/">Initialize</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block create_bucket_button %}{% endblock %}" style="width:14.28%" href="/create_bucket/">Create Bucket/Container</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_bucket_button %}{% endblock %}" style="width:14.28%" href="/list_bucket/">List Buckets/Containers</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block upload_button %}{% endblock %}" style="width:14.28%" href="/upload_ajax/">Upload</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block download_button %}{% endblock %}" style="width:14.28%" href="/download_ajax/">Download</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_object_button %}{% endblock %}" style="width:14.28%" href="/list_object/">List Objects</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block delete_button %}{% endblock %}" style="width:14.28%" href="/delete/">Delete Object</a>
+		</div>
 		{% block body %}
 		{% endblock %}
 	</body>
