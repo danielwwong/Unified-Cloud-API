@@ -172,18 +172,18 @@ def decrypt_file(file_path, password, download_file):
 def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
     # Google
     with open(backup_file_path, 'r') as google_file:
-        dst_uri = boto.storage_uri(google_upload_bucket + '/' + f.filename, google_storage)
+        dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
         dst_uri.new_key().set_contents_from_file(google_file)
     # print 'Successfully Uploaded "%s/%s" to Google' % (dst_uri.bucket_name, dst_uri.object_name)
     google_file.close()
     # Azure
     azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
-    # print 'Successfully Uploaded "%s/%s" to Azure' % (azure_upload_container, f.filename)
+    # print 'Successfully Uploaded "%s/%s" to Azure' % (azure_upload_container, filename)
     # AWS
     with open(backup_file_path, 'r') as aws_file:
-        s3.Object(aws_upload_bucket, f.filename).put(Body = aws_file)
-        s3.Object(aws_upload_bucket, f.filename).Acl().put(ACL='public-read')
-    # print 'Successfully Uploaded "%s/%s" to AWS' % (aws_upload_bucket, f.filename)
+        s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
+        s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
+    # print 'Successfully Uploaded "%s/%s" to AWS' % (aws_upload_bucket, filename)
     aws_file.close()
     return None
 
