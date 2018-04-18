@@ -3,6 +3,7 @@ import custom_api
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
+basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
 temp_file_folder = 'static/temp/'
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
@@ -13,9 +14,31 @@ def initialize():
         azure_account_key = request.form['azure_account_key']
         s3_access_key_id = request.form['s3_access_key_id']
         s3_secret_access_key = request.form['s3_secret_access_key']
+        global username
+        username = request.form['username']
+        decrypt_password = request.form['decrypt_password']
         google_info, azure_info, aws_info = custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
+        if username == '':
+            user_info = 'Failed to Initialize User!'
+        else:
+            if decrypt_password == '':
+                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
+                    user_info = 'Successfully Initialized User!'
+                    flag_new = 0
+                else:
+                    user_info = 'Failed to Initalize User! Please Provide Password!'
+                    flag_new = 0
+            else:
+                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
+                    user_info = 'User Existed!'
+                    flag_new = 0
+                else:
+                    # RSA public/private key generation
+                    custom_api.rsa_key(decrypt_password, username)
+                    user_info = 'Successfully Initialized User!'
+                    flag_new = 1
         flag = 1
-        return render_template('initialize.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+        return render_template('initialize.html', status = flag, google = google_info, azure = azure_info, aws = aws_info, user = user_info, new_user = flag_new, name = username)
     else:
         return render_template('initialize.html')
 
@@ -80,7 +103,7 @@ def upload_ajax():
 
 @app.route('/download_keys/private/', methods = ['GET'])
 def download_private_key():
-    return app.send_static_file('temp/rsa_private_key.bin')
+    return app.send_static_file('temp/' + username + '.bin')
 
 @app.route('/download_keys/public/', methods = ['GET'])
 def download_public_key():

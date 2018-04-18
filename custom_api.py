@@ -131,17 +131,17 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
                     aws_info = aws_info + str(item) + '<br>'
     return google_info, azure_info, aws_info
 
-def rsa_key(password):
+def rsa_key(password, username):
     key = RSA.generate(2048)
     encrypted_key = key.export_key(passphrase = password, pkcs = 8, protection = "scryptAndAES128-CBC")
     # private key
-    with open('static/temp/rsa_private_key.bin', 'wb') as file_out:
+    with open('static/temp/' + username + '.bin', 'wb') as file_out:
         file_out.write(encrypted_key)
     file_out.close()
     # public key
-    with open('static/temp/rsa_private_key.bin', 'rb') as encoded_key:
+    with open('static/temp/' + username + '.bin', 'rb') as encoded_key:
         key_2 = RSA.import_key(encoded_key, passphrase = password)
-        with open('static/temp/rsa_public_key.pem', 'wb') as file_out_2:
+        with open('static/temp/' + username + '.pem', 'wb') as file_out_2:
             file_out_2.write(key_2.publickey().export_key())
         file_out_2.close()
     encoded_key.close()
