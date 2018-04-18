@@ -73,6 +73,7 @@
 							var link = "/download_keys/private/";
 							var download_name = "rsa_private_key.bin";
 							download(link, download_name);
+							information_private_key.innerHTML = "You have 5 seconds to save the private key!"
 							setTimeout(delete_private_key, 5000);
 							function delete_private_key() {
 								var xhr2 = new XMLHttpRequest();
@@ -81,9 +82,6 @@
 								xhr2.onreadystatechange = function() {
 									if (this.readyState == 4 && this.status == 200) {
 										information_private_key.innerHTML = this.responseText;
-									}
-									else {
-										information_private_key.innerHTML = "You have 5 seconds to save the private key!"
 									}
 								}
 							}
