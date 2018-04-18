@@ -192,23 +192,25 @@ def decrypt_file(file_path, password, download_file):
     return info
 
 def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
-    info = ''
     # Google
+    google_info = ''
     with open(backup_file_path, 'r') as google_file:
         dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
         dst_uri.new_key().set_contents_from_file(google_file)
-    info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!<br>'
+    google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
     google_file.close()
     # Azure
+    azure_info = ''
     azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
-    info = info + 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!<br>'
+    azure_info = 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!'
     # AWS
+    aws_info = ''
     with open(backup_file_path, 'r') as aws_file:
         s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
         s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
-    info = info + 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
+    aws_info = 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
     aws_file.close()
-    return info
+    return google_info, azure_info, aws_info
 
 def list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
