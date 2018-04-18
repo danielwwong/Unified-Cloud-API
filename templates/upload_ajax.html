@@ -20,9 +20,27 @@
 			}
 			function UploadFile() {
 				// get bucket/container name
-				var g_bucket = document.getElementsByName("google_upload_bucket")[0].value;
-				var a_container = document.getElementsByName("azure_upload_container")[0].value;
-				var a_bucket = document.getElementsByName("aws_upload_bucket")[0].value;
+				var g_bucket_list = document.getElementsByName("google_upload_bucket");
+				for (var i = 0; i < g_bucket_list.length; i++) {
+					if (g_bucket_list[i].checked) {
+						var g_bucket = g_bucket_list[i].value;
+						break;
+					}
+				}
+				var a_container_list = document.getElementsByName("azure_upload_container");
+				for (var i = 0; i < a_container_list.length; i++) {
+					if (a_container_list[i].checked) {
+						var a_container = a_container_list[i].value;
+						break;
+					}
+				}
+				var a_bucket_list = document.getElementsByName("aws_upload_bucket");
+				for (var i = 0; i < a_bucket_list.length; i++) {
+					if (a_bucket_list[i].checked) {
+						var a_bucket = a_bucket_list[i].value;
+						break;
+					}
+				}
 				// get file element
 				var fileObj = document.getElementById("file_path").files[0];
 				var check = document.getElementsByName("encryption_check")[0];
@@ -48,14 +66,19 @@
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
-				xhr.onload = function () {
-					// return messages
-					if (check_encrypt == "on") {
-						var links = ["/download_keys/private/", "/download_keys/public/"];
-						var download_names = ["rsa_private_key.bin", "rsa_public_key.pem"];
-						download(links, download_names);
+				xhr.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						information.innerHTML = this.responseText;
+						if (check_encrypt == "on") {
+							var links = ["/download_keys/private/", "/download_keys/public/"];
+							var download_names = ["rsa_private_key.bin", "rsa_public_key.pem"];
+							download(links, download_names);
+						}
 					}
-        };
+					else {
+						information.innerHTML = "Running...";
+					}
+				}
 				xhr.upload.addEventListener("progress", progressFunction, false);
 				xhr.send(form);
 			}
@@ -84,12 +107,24 @@
 {% block upload_button %}w3-light-blue{% endblock %}
 {% block body %}
 		<h1>Upload</h1>
-		Google Bucket:<br>
-		<input type="text" name="google_upload_bucket"><br>
-		Azure Container:<br>
-		<input type="text" name="azure_upload_container"><br>
-		AWS Bucket:<br>
-		<input type="text" name="aws_upload_bucket"><br>
+		<p>
+		{% if google.startswith('N') or azure.startswith('N') or aws.startswith('N') %}
+		You should have at least 1 bucket/container in each platform.<br>
+		<a class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" href="/create_bucket/">Create Buckets/Containers</a>
+		{% else %}
+		Google Cloud Storage:<br>
+		{{ google|safe }}
+		Microsoft Azure:<br>
+		{{ azure|safe }}
+		Amazon S3:<br>
+		{{ aws|safe }}
+		<script type="text/javascript">
+			document.getElementsByName("google_upload_bucket")[0].checked = true;
+			document.getElementsByName("azure_upload_container")[0].checked = true;
+			document.getElementsByName("aws_upload_bucket")[0].checked = true;
+		</script>
+		{% endif %}
+		</p>
 		Select File:<br>
 		<input type="file" id="file_path"><br>
 		<input type="checkbox" name="encryption_check" id="if_encryption" onclick="InsertInput(this);" checked><label for="if_encryption">Encrypt</label>
@@ -101,4 +136,5 @@
 		<input type="button" onclick="UploadFile();" value="Upload">
 		<progress id="progressBar" value="0" max="100"></progress>
 		<span id="percentage"></span>
+		<div id="information"></div>
 {% endblock %}

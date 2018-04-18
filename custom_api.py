@@ -84,29 +84,51 @@ def create_bucket(google_bucket_name, azure_container_name, aws_bucket_name, goo
             aws_info = 'Failed to Create AWS Bucket: ' + str(a_e)
     return google_info, azure_info, aws_info
 
-def list_bucket(google_platform_check, azure_platform_check, aws_platform_check):
+def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
     google_info = ''
     if google_platform_check == 'on':
         uri = boto.storage_uri('', google_storage)
-        google_info = 'Google Buckets:<br>'
-        for bucket in uri.get_all_buckets(headers = google_header_values):
-            google_info = google_info + str(bucket.name) + '<br>'
+        google_bucket_list = uri.get_all_buckets(headers = google_header_values)
+        if len(google_bucket_list) == 0:
+            google_info = 'No Google Buckets!<br>'
+        else:
+            if page == 'upload_page':
+                for bucket in google_bucket_list:
+                    google_info = google_info + '<input type="radio" name="google_upload_bucket" id="g_' + str(bucket.name) + '" value="' + str(bucket.name) + '"><label for="g_' + str(bucket.name) + '">' + str(bucket.name) + '</label><br>'
+            else:
+                google_info = 'Google Buckets:<br>'
+                for bucket in google_bucket_list:
+                    google_info = google_info + str(bucket.name) + '<br>'
     # Azure
     azure_info = ''
     if azure_platform_check == 'on':
         container_list = azure.list_containers()
-        azure_info = 'Azure Containers:<br>'
-        for container in container_list:
-            azure_info = azure_info + str(container.name) + '<br>'
+        if len(list(container_list)) == 0:
+            azure_info = 'No Azure Containers!<br>'
+        else:
+            if page == 'upload_page':
+                for container in container_list:
+                    azure_info = azure_info + '<input type="radio" name="azure_upload_container" id="m_' + str(container.name) + '" value="' + str(container.name) + '"><label for="m_' + str(container.name) + '">' + str(container.name) + '</label><br>'
+            else:
+                azure_info = 'Azure Containers:<br>'
+                for container in container_list:
+                    azure_info = azure_info + str(container.name) + '<br>'
     # AWS
     aws_info = ''
     if aws_platform_check == 'on':
         response = s3_client.list_buckets()
         buckets = [bucket['Name'] for bucket in response['Buckets']]
-        aws_info = 'AWS Buckets:<br>'
-        for item in buckets:
-            aws_info = aws_info + str(item) + '<br>'
+        if len(buckets) == 0:
+            aws_info = 'No AWS Buckets!<br>'
+        else:
+            if page == 'upload_page':
+                for item in buckets:
+                    aws_info = aws_info + '<input type="radio" name="aws_upload_bucket" id="a_' + str(item) + '" value="' + str(item) + '"><label for="a_' + str(item) + '">' + str(item) + '</label><br>'
+            else:
+                aws_info = 'AWS Buckets:<br>'
+                for item in buckets:
+                    aws_info = aws_info + str(item) + '<br>'
     return google_info, azure_info, aws_info
 
 def rsa_key(password):
@@ -170,22 +192,23 @@ def decrypt_file(file_path, password, download_file):
     return info
 
 def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
+    info = ''
     # Google
     with open(backup_file_path, 'r') as google_file:
         dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
         dst_uri.new_key().set_contents_from_file(google_file)
-    # print 'Successfully Uploaded "%s/%s" to Google' % (dst_uri.bucket_name, dst_uri.object_name)
+    info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!<br>'
     google_file.close()
     # Azure
     azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
-    # print 'Successfully Uploaded "%s/%s" to Azure' % (azure_upload_container, filename)
+    info = info + 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!<br>'
     # AWS
     with open(backup_file_path, 'r') as aws_file:
         s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
         s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
-    # print 'Successfully Uploaded "%s/%s" to AWS' % (aws_upload_bucket, filename)
+    info = info + 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
     aws_file.close()
-    return None
+    return info
 
 def list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google

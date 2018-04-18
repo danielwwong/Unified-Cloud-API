@@ -40,7 +40,8 @@ def list_bucket():
         google_platform_check = request.form.get('google_platform')
         azure_platform_check = request.form.get('azure_platform')
         aws_platform_check = request.form.get('aws_platform')
-        google_info, azure_info, aws_info = custom_api.list_bucket(google_platform_check, azure_platform_check, aws_platform_check)
+        page = 'list_page'
+        google_info, azure_info, aws_info = custom_api.list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check)
         flag = 1
         return render_template('list_bucket.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
     else:
@@ -64,12 +65,17 @@ def upload():
         # encrypt file
         custom_api.encrypt_file(backup_file_path)
     # upload
-    custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
-    return render_template('upload_ajax.html')
+    info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
+    return info
 
 @app.route('/upload_ajax/')
 def upload_ajax():
-    return render_template('upload_ajax.html')
+    google_platform_check = 'on'
+    azure_platform_check = 'on'
+    aws_platform_check = 'on'
+    page = 'upload_page'
+    google_info, azure_info, aws_info = custom_api.list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check)
+    return render_template('upload_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
 
 @app.route('/download_keys/private/', methods = ['GET'])
 def download_private_key():
