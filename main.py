@@ -145,5 +145,11 @@ def delete():
     else:
         return render_template('delete_object.html')
 
+@app.route('/delete_private_key/', methods = ['POST'])
+def delete_private_key():
+    custom_api.os.remove(temp_file_folder + 'rsa_private_key.bin')
+    info = 'Successfully Deleted Private Key in Server.'
+    return info
+
 if __name__ == '__main__':
     app.run(debug = True)

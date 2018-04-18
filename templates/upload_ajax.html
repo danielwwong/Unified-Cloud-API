@@ -70,9 +70,23 @@
 					if (this.readyState == 4 && this.status == 200) {
 						information.innerHTML = this.responseText;
 						if (check_encrypt == "on") {
-							var links = ["/download_keys/private/", "/download_keys/public/"];
-							var download_names = ["rsa_private_key.bin", "rsa_public_key.pem"];
-							download(links, download_names);
+							var link = "/download_keys/private/";
+							var download_name = "rsa_private_key.bin";
+							download(link, download_name);
+							setTimeout(delete_private_key, 5000);
+							function delete_private_key() {
+								var xhr2 = new XMLHttpRequest();
+								xhr2.open("post", "/delete_private_key/");
+								xhr2.send();
+								xhr2.onreadystatechange = function() {
+									if (this.readyState == 4 && this.status == 200) {
+										information_private_key.innerHTML = this.responseText;
+									}
+									else {
+										information_private_key.innerHTML = "You have 5 seconds to save the private key!"
+									}
+								}
+							}
 						}
 					}
 					else {
@@ -86,11 +100,9 @@
 				var element = document.createElement("a");
 				element.style.display = 'none';
 				document.body.appendChild(element);
-				for (var i = 0; i < name.length; i++) {
-					element.setAttribute("href", name[i]);
-					element.setAttribute("download", download_name[i]);
-					element.click();
-				}
+				element.setAttribute("href", name);
+				element.setAttribute("download", download_name);
+				element.click();
 				document.body.removeChild(element);
 			}
 			function progressFunction(evt) {
@@ -107,11 +119,13 @@
 {% block upload_button %}w3-light-blue{% endblock %}
 {% block body %}
 		<h1>Upload</h1>
-		<p>
 		{% if google.startswith('N') or azure.startswith('N') or aws.startswith('N') %}
+		<p>
 		You should have at least 1 bucket/container in each platform.<br>
 		<a class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" href="/create_bucket/">Create Buckets/Containers</a>
+		</p>
 		{% else %}
+		<p>
 		Google Cloud Storage:<br>
 		{{ google|safe }}
 		Microsoft Azure:<br>
@@ -123,7 +137,6 @@
 			document.getElementsByName("azure_upload_container")[0].checked = true;
 			document.getElementsByName("aws_upload_bucket")[0].checked = true;
 		</script>
-		{% endif %}
 		</p>
 		Select File:<br>
 		<input type="file" id="file_path"><br>
@@ -137,4 +150,6 @@
 		<progress id="progressBar" value="0" max="100"></progress>
 		<span id="percentage"></span>
 		<div id="information"></div>
+		<div id="information_private_key"></div>
+		{% endif %}
 {% endblock %}
