@@ -1,36 +1,91 @@
 {% extends 'base.html' %}
 {% block head %}
 		<title>Initialize</title>
+		<script type="text/javascript">
+			function InsertPasswordInput(radioList) {
+				for (var i = 0; i < radioList.length; i++) {
+					if (radioList[i].checked) {
+						var radioStatus = radioList[i].value;
+						break;
+					}
+				}
+				if (radioStatus == "new"){
+					document.getElementById("dynamic_username").style.display = "block";
+					document.getElementById("dynamic_password").style.display = "block";
+				}
+				else {
+					document.getElementById("dynamic_username").style.display = "block";
+					document.getElementById("dynamic_password").style.display = "none";
+				}
+			}
+		</script>
 {% endblock %}
 {% block initialize_button %}w3-light-blue{% endblock %}
 {% block body %}
-		<div class="w3-card-4 w3-light-gray w3-round-large w3-mycenter">
+		<div class="w3-card-4 w3-light-gray w3-round-large w3-margin-bottom w3-mycenter">
 			<div class="w3-container w3-round-large w3-blue w3-center">
 				<h3><b>Initialization</b></h3>
 			</div>
 			<form class="w3-container" action="/initialize/" method="POST">
-				<p><b>Google Project ID:</b>
-				<input class="w3-input w3-round-large" type="text" name="google_project_id"></p>
-				<p><b>Azure Storage Account Name:</b>
-				<input class="w3-input w3-round-large" type="text" name="azure_account_name"></p>
-				<p><b>Azure Storage Account Key:</b>
-				<input class="w3-input w3-round-large" type="password" name="azure_account_key"></p>
-				<p><b>AWS Access Key ID:</b>
-				<input class="w3-input w3-round-large" type="password" name="s3_access_key_id"></p>
-				<p><b>AWS Secret Access Key:</b>
-				<input class="w3-input w3-round-large" type="password" name="s3_secret_access_key"></p>
-				<p><input class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" type="submit" value="Initialize"></p>
+				<p>
+					<b>Google Project ID:</b>
+					<input class="w3-input w3-round-large" type="text" name="google_project_id">
+				</p>
+				<p>
+					<b>Azure Storage Account Name:</b>
+					<input class="w3-input w3-round-large" type="text" name="azure_account_name">
+				</p>
+				<p>
+					<b>Azure Storage Account Key:</b>
+					<input class="w3-input w3-round-large" type="password" name="azure_account_key">
+				</p>
+				<p>
+					<b>AWS Access Key ID:</b>
+					<input class="w3-input w3-round-large" type="password" name="s3_access_key_id">
+				</p>
+				<p>
+					<b>AWS Secret Access Key:</b>
+					<input class="w3-input w3-round-large" type="password" name="s3_secret_access_key">
+				</p>
+				<p>
+					<input class="w3-radio" type="radio" name="user_status" id="new_user" onclick="InsertPasswordInput(document.getElementsByName('user_status'));" value="new"><label for="new_user"><b>New User</b></label>
+					<input class="w3-radio" type="radio" name="user_status" id="existing_user" onclick="InsertPasswordInput(document.getElementsByName('user_status'));" value="exist"><label for="existing_user"><b>Existing User</b></label>
+				</p>
+				<p id="dynamic_username" style="display:none">
+					<b>User Name:</b>
+					<input class="w3-input w3-round-large" type="text" name="username">
+				</p>
+				<p id="dynamic_password" style="display:none">
+					<b>Password:</b>
+					<input class="w3-input w3-round-large" type="password" name="decrypt_password">
+				</p>
+				<p>
+					<input class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" type="submit" value="Initialize">
+				</p>
 			</form>
 		</div>
 		{% if status %}
+			{% if user.startswith('S') %}
+			<div class="w3-panel w3-pale-green w3-card-4 w3-display-container w3-margin-bottom w3-round-large w3-mycenter">
+				<span onclick="this.parentElement.style.display='none'" class="w3-button w3-pale-green w3-hover-red w3-ripple w3-round-large w3-large w3-display-topright">&times;</span>
+				<h3>Success!</h3>
+				<p>{{ user }}</p>
+			</div>
+			{% else %}
+			<div class="w3-panel w3-pale-red w3-card-4 w3-display-container w3-margin-bottom w3-round-large w3-mycenter">
+				<span onclick="this.parentElement.style.display='none'" class="w3-button w3-pale-red w3-hover-red w3-ripple w3-round-large w3-large w3-display-topright">&times;</span>
+				<h3>Error!</h3>
+				<p>{{ user }}</p>
+			</div>
+			{% endif %}
 			{% if google.startswith('S') %}
-			<div class="w3-panel w3-pale-green w3-card-4 w3-display-container w3-section w3-round-large w3-mycenter">
+			<div class="w3-panel w3-pale-green w3-card-4 w3-display-container w3-margin-bottom w3-round-large w3-mycenter">
 				<span onclick="this.parentElement.style.display='none'" class="w3-button w3-pale-green w3-hover-red w3-ripple w3-round-large w3-large w3-display-topright">&times;</span>
 				<h3>Success!</h3>
 				<p>{{ google }}</p>
 			</div>
 			{% else %}
-			<div class="w3-panel w3-pale-red w3-card-4 w3-display-container w3-section w3-round-large w3-mycenter">
+			<div class="w3-panel w3-pale-red w3-card-4 w3-display-container w3-margin-bottom w3-round-large w3-mycenter">
 				<span onclick="this.parentElement.style.display='none'" class="w3-button w3-pale-red w3-hover-red w3-ripple w3-round-large w3-large w3-display-topright">&times;</span>
 				<h3>Error!</h3>
 				<p>{{ google|safe }}</p>
