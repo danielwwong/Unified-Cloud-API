@@ -135,13 +135,13 @@ def rsa_key(password, username):
     key = RSA.generate(2048)
     encrypted_key = key.export_key(passphrase = password, pkcs = 8, protection = "scryptAndAES128-CBC")
     # private key
-    with open('static/temp/' + username + '.bin', 'wb') as file_out:
+    with open('static/keys/' + username + '.bin', 'wb') as file_out:
         file_out.write(encrypted_key)
     file_out.close()
     # public key
-    with open('static/temp/' + username + '.bin', 'rb') as encoded_key:
+    with open('static/keys/' + username + '.bin', 'rb') as encoded_key:
         key_2 = RSA.import_key(encoded_key, passphrase = password)
-        with open('static/temp/' + username + '.pem', 'wb') as file_out_2:
+        with open('static/keys/' + username + '.pem', 'wb') as file_out_2:
             file_out_2.write(key_2.publickey().export_key())
         file_out_2.close()
     encoded_key.close()
@@ -153,7 +153,7 @@ def encrypt_file(backup_file_path, username):
         data = file_read.read()
     file_read.close()
     with open(backup_file_path, 'wb') as file_output:
-        recipient_key = RSA.import_key(open('static/temp/' + username + '.pem').read())
+        recipient_key = RSA.import_key(open('static/keys/' + username + '.pem').read())
         session_key = get_random_bytes(16)
         # encrypt the session key with the public RSA key
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
@@ -170,10 +170,10 @@ def encrypt_file(backup_file_path, username):
     # print 'Successfully Encrypted "%s"' % backup_file_path
     return None
 
-def decrypt_file(file_path, password, download_file):
+def decrypt_file(file_path, password, download_file, username):
     try:
         with open(file_path, 'rb') as f:
-            private_key = RSA.import_key(open('static/temp/rsa_private_key.bin').read(), passphrase = password)
+            private_key = RSA.import_key(open('static/keys/' + username + '.bin').read(), passphrase = password)
             enc_session_key, nonce, tag, ciphertext = [f.read(x) for x in (private_key.size_in_bytes(), 16, 16, -1)]
             # decrypt the session key with the private RSA key
             cipher_rsa = PKCS1_OAEP.new(private_key)

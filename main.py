@@ -5,6 +5,7 @@ app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
 basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
 temp_file_folder = 'static/temp/'
+key_file_folder = 'static/keys/'
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
@@ -22,12 +23,12 @@ def initialize():
             user_info = 'Failed to Initialize User!'
         else:
             if decrypt_password == '':
-                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
+                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, key_file_folder) + username + '.pem')):
                     user_info = 'Successfully Initialized User!'
                 else:
                     user_info = 'Failed to Initalize User! Please Provide Password!'
             else:
-                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
+                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, key_file_folder) + username + '.pem')):
                     user_info = 'User Existed!'
                 else:
                     # RSA public/private key generation
@@ -119,15 +120,13 @@ def download():
     platform = request.form['platform']
     file_source_bucket = request.form['file_source_bucket']
     download_file = request.form['download_file']
-    check_decrypt = request.form.get('decryption_check')
     password = request.form['input_password']
     # add a '.' in front of filename to hide the file in macOS
     file_path = temp_file_folder + download_file
     # download
     info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
     # decryption
-    if check_decrypt == 'on':
-        info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file)
+    info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file, username)
     return info
 
 @app.route('/download_ajax/')
@@ -161,7 +160,7 @@ def delete():
 
 #@app.route('/delete_private_key/', methods = ['POST'])
 #def delete_private_key():
-#    custom_api.os.remove(temp_file_folder + 'rsa_private_key.bin')
+#    custom_api.os.remove(key_file_folder + 'rsa_private_key.bin')
 #    info = 'Successfully Deleted Private Key in Server.'
 #    return info
 
