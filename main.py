@@ -72,17 +72,11 @@ def upload():
     google_upload_bucket = request.form['google_upload_bucket']
     azure_upload_container = request.form['azure_upload_container']
     aws_upload_bucket = request.form['aws_upload_bucket']
-    check_encrypt = request.form.get('encryption_check')
-    password = request.form['input_password']
     # add a '.' in front of filename to hide the file in macOS
     backup_file_path = backup_file_folder + f.filename
     f.save(backup_file_path)
-    # encryption
-    if check_encrypt == 'on':
-        # RSA public/private key generation
-        custom_api.rsa_key(password)
-        # encrypt file
-        custom_api.encrypt_file(backup_file_path)
+    # encrypt file
+    custom_api.encrypt_file(backup_file_path, username)
     # upload
     google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
     info = google_info + '<br>' + azure_info + '<br>' + aws_info
@@ -165,11 +159,11 @@ def delete():
     else:
         return render_template('delete_object.html')
 
-@app.route('/delete_private_key/', methods = ['POST'])
-def delete_private_key():
-    custom_api.os.remove(temp_file_folder + 'rsa_private_key.bin')
-    info = 'Successfully Deleted Private Key in Server.'
-    return info
+#@app.route('/delete_private_key/', methods = ['POST'])
+#def delete_private_key():
+#    custom_api.os.remove(temp_file_folder + 'rsa_private_key.bin')
+#    info = 'Successfully Deleted Private Key in Server.'
+#    return info
 
 if __name__ == '__main__':
     app.run(debug = True)

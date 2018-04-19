@@ -147,13 +147,13 @@ def rsa_key(password, username):
     encoded_key.close()
     return None
 
-def encrypt_file(backup_file_path):
+def encrypt_file(backup_file_path, username):
     data = ''
     with open(backup_file_path, 'rb') as file_read:
         data = file_read.read()
     file_read.close()
     with open(backup_file_path, 'wb') as file_output:
-        recipient_key = RSA.import_key(open('static/temp/rsa_public_key.pem').read())
+        recipient_key = RSA.import_key(open('static/temp/' + username + '.pem').read())
         session_key = get_random_bytes(16)
         # encrypt the session key with the public RSA key
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
