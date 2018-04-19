@@ -24,21 +24,17 @@ def initialize():
             if decrypt_password == '':
                 if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
                     user_info = 'Successfully Initialized User!'
-                    flag_new = 0
                 else:
                     user_info = 'Failed to Initalize User! Please Provide Password!'
-                    flag_new = 0
             else:
                 if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, temp_file_folder) + username + '.pem')):
                     user_info = 'User Existed!'
-                    flag_new = 0
                 else:
                     # RSA public/private key generation
                     custom_api.rsa_key(decrypt_password, username)
                     user_info = 'Successfully Initialized User!'
-                    flag_new = 1
         flag = 1
-        return render_template('initialize.html', status = flag, google = google_info, azure = azure_info, aws = aws_info, user = user_info, new_user = flag_new, name = username)
+        return render_template('initialize.html', status = flag, google = google_info, azure = azure_info, aws = aws_info, user = user_info)
     else:
         return render_template('initialize.html')
 
@@ -101,13 +97,13 @@ def upload_ajax():
     google_info, azure_info, aws_info = custom_api.list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check)
     return render_template('upload_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
 
-@app.route('/download_keys/private/', methods = ['GET'])
-def download_private_key():
-    return app.send_static_file('temp/' + username + '.bin')
-
-@app.route('/download_keys/public/', methods = ['GET'])
-def download_public_key():
-    return app.send_static_file('temp/rsa_public_key.pem')
+#@app.route('/download_keys/private/', methods = ['GET'])
+#def download_private_key():
+#    return app.send_static_file('temp/' + username + '.bin')
+#
+#@app.route('/download_keys/public/', methods = ['GET'])
+#def download_public_key():
+#    return app.send_static_file('temp/rsa_public_key.pem')
 
 @app.route('/list_object/', methods = ['GET', 'POST'])
 def list_object():
