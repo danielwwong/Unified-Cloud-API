@@ -86,7 +86,6 @@ def create_bucket(google_bucket_name, azure_container_name, aws_bucket_name, goo
 
 def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
-    google_info = ''
     if google_platform_check == 'on':
         uri = boto.storage_uri('', google_storage)
         google_bucket_list = uri.get_all_buckets(headers = google_header_values)
@@ -94,28 +93,40 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             google_info = 'No Google Buckets!<br>'
         else:
             if page == 'upload_page':
+                google_info = ''
                 for bucket in google_bucket_list:
                     google_info = google_info + '<input type="radio" name="google_upload_bucket" id="g_' + str(bucket.name) + '" value="' + str(bucket.name) + '"><label for="g_' + str(bucket.name) + '">' + str(bucket.name) + '</label><br>'
+            elif page == 'download_page':
+                google_info = []
+                for bucket in google_bucket_list:
+                    google_info.append(str(bucket.name))
             else:
                 google_info = 'Google Buckets:<br>'
                 for bucket in google_bucket_list:
                     google_info = google_info + str(bucket.name) + '<br>'
+    else:
+        google_info = ''
     # Azure
-    azure_info = ''
     if azure_platform_check == 'on':
         container_list = azure.list_containers()
         if len(list(container_list)) == 0:
             azure_info = 'No Azure Containers!<br>'
         else:
             if page == 'upload_page':
+                azure_info = ''
                 for container in container_list:
                     azure_info = azure_info + '<input type="radio" name="azure_upload_container" id="m_' + str(container.name) + '" value="' + str(container.name) + '"><label for="m_' + str(container.name) + '">' + str(container.name) + '</label><br>'
+            elif page == 'download_page':
+                azure_info = []
+                for container in container_list:
+                    azure_info.append(str(container.name))
             else:
                 azure_info = 'Azure Containers:<br>'
                 for container in container_list:
                     azure_info = azure_info + str(container.name) + '<br>'
+    else:
+        azure_info = ''
     # AWS
-    aws_info = ''
     if aws_platform_check == 'on':
         response = s3_client.list_buckets()
         buckets = [bucket['Name'] for bucket in response['Buckets']]
@@ -123,12 +134,19 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             aws_info = 'No AWS Buckets!<br>'
         else:
             if page == 'upload_page':
+                aws_info = ''
                 for item in buckets:
                     aws_info = aws_info + '<input type="radio" name="aws_upload_bucket" id="a_' + str(item) + '" value="' + str(item) + '"><label for="a_' + str(item) + '">' + str(item) + '</label><br>'
+            elif page == 'download_page':
+                aws_info = []
+                for item in buckets:
+                    aws_info.append(str(item))
             else:
                 aws_info = 'AWS Buckets:<br>'
                 for item in buckets:
                     aws_info = aws_info + str(item) + '<br>'
+    else:
+        aws_info = ''
     return google_info, azure_info, aws_info
 
 def rsa_key(password, username):
@@ -212,25 +230,61 @@ def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload
     aws_file.close()
     return google_info, azure_info, aws_info
 
-def list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
+def list_object(page, google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
-    google_info = ''
     if google_platform_check == 'on':
         uri = boto.storage_uri(google_bucket_name, google_storage)
-        for g_obj in uri.get_bucket():
-            google_info = google_info + 'Google://' + str(uri.bucket_name) + '/' + str(g_obj.name) + '<br>'
+        google_object_list = uri.get_bucket()
+        i = 0
+        for key in google_object_list.list():
+            i += 1
+        if i == 0:
+            google_info = 'No Objects in This Google Bucket!<br>'
+        else:
+            if page == 'download_page':
+                google_info = []
+                for g_obj in google_object_list:
+                    google_info.append(str(g_obj.name))
+            else:
+                google_info = ''
+                for g_obj in google_object_list:
+                    google_info = google_info + 'Google://' + str(uri.bucket_name) + '/' + str(g_obj.name) + '<br>'
+    else:
+        google_info = ''
     # Azure
-    azure_info = ''
     if azure_platform_check == 'on':
         generator = azure.list_blobs(azure_container_name)
-        for blob in generator:
-            azure_info = azure_info + 'Azure://' + str(azure_container_name) + '/' + str(blob.name) + '<br>'
+        if len(list(generator)) == 0:
+            azure_info = 'No Objects in This Azure Container!<br>'
+        else:
+            if page == 'download_page':
+                azure_info = []
+                for blob in generator:
+                    azure_info.append(str(blob.name))
+            else:
+                azure_info = ''
+                for blob in generator:
+                    azure_info = azure_info + 'Azure://' + str(azure_container_name) + '/' + str(blob.name) + '<br>'
+    else:
+        azure_info = ''
     # AWS
-    aws_info = ''
     if aws_platform_check == 'on':
         bucket = s3.Bucket(aws_bucket_name)
-        for a_obj in bucket.objects.all():
-            aws_info = aws_info + 'AWS://' + str(a_obj.bucket_name) + '/' + str(a_obj.key) + '<br>'
+        aws_object_list = bucket.objects.all()
+        size = sum(1 for _ in aws_object_list)
+        if size == 0:
+            aws_info = 'No Objects in This Google Bucket!<br>'
+        else:
+            if page == 'download_page':
+                aws_info = []
+                for a_obj in aws_object_list:
+                    aws_info.append(str(a_obj.key))
+            else:
+                aws_info = ''
+                for a_obj in aws_object_list:
+                    aws_info = aws_info + 'AWS://' + str(a_obj.bucket_name) + '/' + str(a_obj.key) + '<br>'
+    else:
+        aws_info = ''
     return google_info, azure_info, aws_info
 
 def download_object(platform, file_source_bucket, destination_path, download_file):
