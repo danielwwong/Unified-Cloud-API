@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request
 import custom_api
+import threading
+import time
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
@@ -118,16 +120,57 @@ def list_object():
 
 @app.route('/download/', methods = ['POST'])
 def download():
-    platform = request.form['platform']
-    file_source_bucket = request.form['file_source_bucket']
-    download_file = request.form['download_file']
+    # get selected download information from frontend
+    platform = request.form.getlist('platform[]')
+    file_source_bucket = request.form.getlist('file_source_bucket[]')
+    download_file = request.form.getlist('download_file[]')
     password = request.form['input_password']
-    # add a '.' in front of filename to hide the file in macOS
-    file_path = temp_file_folder + download_file
+    # parse information into 3 platform
+    google_file_source_bucket = []
+    google_download_file = []
+    azure_file_source_bucket = []
+    azure_download_file = []
+    aws_file_source_bucket = []
+    aws_download_file = []
+    for x in range(len(platform)):
+        if platform[x] == 'Google':
+            google_file_source_bucket.append(file_source_bucket[x])
+            google_download_file.append(download_file[x])
+        elif platform[x] == 'Azure':
+            azure_file_source_bucket.append(file_source_bucket[x])
+            azure_download_file.append(download_file[x])
+        else:
+            aws_file_source_bucket.append(file_source_bucket[x])
+            aws_download_file.append(download_file[x])
     # download
-    info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
-    # decryption
-    info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file, username)
+    # multithreading, one platform one thread
+    for x in range(len(google_file_source_bucket)):
+        t1 = threading.Thread(target = custom_api.download_object, name = 'GoogleDownloadThread', args = ('Google', google_file_source_bucket[x], temp_file_folder, google_download_file[x]))
+        t1.start()
+        for y in range(len(azure_file_source_bucket)):
+            t2 = threading.Thread(target = custom_api.download_object, name = 'AzureDownloadThread', args = ('Azure', azure_file_source_bucket[y], temp_file_folder, azure_download_file[y]))
+            t2.start()
+            for z in range(len(aws_file_source_bucket)):
+                t3 = threading.Thread(target = custom_api.download_object, name = 'AWSDownloadThread', args = ('AWS', aws_file_source_bucket[z], temp_file_folder, aws_download_file[z]))
+                t3.start()
+                t3.join()
+            t2.join()
+        t1.join()
+
+
+
+
+
+
+
+#    # add a '.' in front of filename to hide the file in macOS
+#    file_path = temp_file_folder + download_file
+#    # download
+#    info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
+#    # decryption
+#    info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file, username)
+#    return info
+    info = ''
     return info
 
 @app.route('/download_ajax/')
@@ -145,7 +188,7 @@ def download_ajax():
             google_object_list, arg_2, arg_3 = custom_api.list_object(page, google_bucket_name[x], arg, arg, google_platform_check, arg, arg)
             if not isinstance(google_object_list, str):
                 for y in range(len(google_object_list)):
-                    google_info = google_info + '<tr class="w3-hover-light-blue" onclick="check_checkbox(document.getElementById(\'' + google_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Google" id="' + google_object_list[y] + '" value="' + google_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + google_object_list[y] + '</td>\n<td>' + google_bucket_name[x] + '</td>\n<td>Google</td>\n</tr>'#value is what bucket, id is what object name, name is what platform
+                    google_info = google_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + google_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Google" id="' + google_object_list[y] + '" value="' + google_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + google_object_list[y] + '</td>\n<td>' + google_bucket_name[x] + '</td>\n<td>Google</td>\n</tr>'# name is platform, value is source bucket, id is object name
     # Azure
     azure_info = ''
     if not isinstance(azure_container_name, str):
@@ -153,7 +196,7 @@ def download_ajax():
             arg_2, azure_object_list, arg_3 = custom_api.list_object(page, arg, azure_container_name[x], arg, arg, azure_platform_check, arg)
             if not isinstance(azure_object_list, str):
                 for y in range(len(azure_object_list)):
-                    azure_info = azure_info + '<tr class="w3-hover-light-blue" onclick="check_checkbox(document.getElementById(\'' + azure_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Azure" id="' + azure_object_list[y] + '" value="' + azure_container_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + azure_object_list[y] + '</td>\n<td>' + azure_container_name[x] + '</td>\n<td>Azure</td>\n</tr>'
+                    azure_info = azure_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + azure_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Azure" id="' + azure_object_list[y] + '" value="' + azure_container_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + azure_object_list[y] + '</td>\n<td>' + azure_container_name[x] + '</td>\n<td>Azure</td>\n</tr>'# name is platform, value is source bucket, id is object name
     # AWS
     aws_info = ''
     if not isinstance(aws_bucket_name, str):
@@ -161,7 +204,7 @@ def download_ajax():
             arg_2, arg_3, aws_objcet_list = custom_api.list_object(page, arg, arg, aws_bucket_name[x], arg, arg, aws_platform_check)
             if not isinstance(aws_objcet_list, str):
                 for y in range(len(aws_objcet_list)):
-                    aws_info = aws_info + '<tr class="w3-hover-light-blue" onclick="check_checkbox(document.getElementById(\'' + aws_objcet_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="AWS" id="' + aws_objcet_list[y] + '" value="' + aws_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + aws_objcet_list[y] + '</td>\n<td>' + aws_bucket_name[x] + '</td>\n<td>AWS</td>\n</tr>'
+                    aws_info = aws_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + aws_objcet_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="AWS" id="' + aws_objcet_list[y] + '" value="' + aws_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + aws_objcet_list[y] + '</td>\n<td>' + aws_bucket_name[x] + '</td>\n<td>AWS</td>\n</tr>'# name is platform, value is source bucket, id is object name
     if len(google_info) == 0 and len(azure_info) == 0 and len(aws_info) == 0:
         google_info = 0
     return render_template('download_ajax.html', google = google_info, azure = azure_info, aws = aws_info)

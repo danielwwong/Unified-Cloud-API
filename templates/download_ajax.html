@@ -3,24 +3,28 @@
 		<title>Download Object</title>
 		<script type="text/javascript">
 			function DownloadFile() {
-				// get inputs
-				var platform_list = document.getElementsByName("platform");
-				for (var i = 0; i < platform_list.length; i++) {
-					if (platform_list[i].checked) {
-						var platform = platform_list[i].value;
-						break;
+				// get checked objects' information
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				var platform = [];
+				var file_source_bucket = [];
+				var download_file = [];
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked) {
+						platform.push(checkboxes[i].name);
+						file_source_bucket.push(checkboxes[i].value);
+						download_file.push(checkboxes[i].id);
 					}
 				}
-				var file_source_bucket = document.getElementsByName("file_source_bucket")[0].value;
-				var download_file = document.getElementsByName("download_file")[0].value;
 				var password = document.getElementById("input_password").value;
 				// download controller
 				var FileController = "/download/";
 				// FormData
 				var form = new FormData();
-				form.append("platform", platform);
-				form.append("file_source_bucket", file_source_bucket);
-				form.append("download_file", download_file);
+				for (var i = 0; i < platform.length; i++) {
+					form.append("platform[]", platform[i]);
+					form.append("file_source_bucket[]", file_source_bucket[i]);
+					form.append("download_file[]", download_file[i]);
+				}
 				form.append("input_password", password);
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
@@ -28,8 +32,8 @@
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						information.innerHTML = this.responseText;
-						var link = "/download_files/" + download_file;
-						download(link, download_file);
+						// var link = "/download_files/" + download_file;
+						// download(link, download_file);
 					}
 					else {
 						information.innerHTML = "Running...";
@@ -60,7 +64,7 @@
 {% block body %}
 		<h1>Download</h1>
 		<div class="w3-container">
-			<table class="w3-table-all w3-card-4">
+			<table class="w3-table-all w3-card-4" id="object_table">
 				<thead>
 					<tr class="w3-blue">
 						<th></th>
@@ -83,14 +87,8 @@
 						{{ aws|safe }}
 					{% endif %}
 				</tbody>
-			</div>
+			</table>
 		</div>
-
-		<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
-		<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
-		<input type="radio" name="platform" id="check_aws" value="AWS"><label for="check_aws">Amazon S3</label><br>
-		Bucket/Container Name: <input type="text" name="file_source_bucket"><br>
-		Download Object Name: <input type="text" name="download_file"><br>
 		Password for Decryption: <input type="password" id="input_password"><br>
 		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
 		<div id="information"></div>
