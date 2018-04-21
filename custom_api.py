@@ -287,8 +287,10 @@ def list_object(page, google_bucket_name, azure_container_name, aws_bucket_name,
         aws_info = ''
     return google_info, azure_info, aws_info
 
+download_info = ''
+
 def download_object(platform, file_source_bucket, destination_path, download_file):
-    info = ''
+    global download_info
     # Google
     if platform == 'Google':
         src_uri = boto.storage_uri(file_source_bucket + '/' + download_file, google_storage)
@@ -298,22 +300,22 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
         object_contents.seek(0) # the beginning of the file
         dst_uri.new_key().set_contents_from_file(object_contents)
         object_contents.close()
-        info = 'Successfully Downloaded ' + download_file + ' from Google://' + file_source_bucket
+        download_info = download_info + 'Successfully Downloaded ' + download_file + ' from Google://' + file_source_bucket
     # Azure
     elif platform == 'Azure':
         azure.get_blob_to_path(file_source_bucket, download_file, destination_path + download_file)
-        info = 'Successfully Downloaded ' + download_file + ' from Azure://' + file_source_bucket
+        download_info = download_info + 'Successfully Downloaded ' + download_file + ' from Azure://' + file_source_bucket
     # AWS
     elif platform == 'AWS':
         try:
             s3.Bucket(file_source_bucket).download_file(download_file, destination_path + download_file)
-            info = 'Successfully Downloaded ' + download_file + ' from AWS://' + file_source_bucket
+            download_info = download_info + 'Successfully Downloaded ' + download_file + ' from AWS://' + file_source_bucket
         except botocore.exceptions.ClientError as e:
             if e.response['Error']['Code'] == "404":
-                info = 'The object does not exist.'
+                download_info = download_info + 'The object does not exist.'
             else:
                 raise
-    return info
+    return download_info
 
 def delete_object(platform, file_source_bucket, delete_file):
     # Google

@@ -170,8 +170,7 @@ def download():
 #    # decryption
 #    info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file, username)
 #    return info
-    info = ''
-    return info
+    return custom_api.download_info
 
 @app.route('/download_ajax/')
 def download_ajax():
