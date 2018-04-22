@@ -20,6 +20,10 @@
 				width: 80%;
 				margin: 0 auto;
 			}
+			.w3-mycenter-small {
+				width: 50%;
+				margin: 0 auto;
+			}
 		</style>
 		{% block head %}
 		{% endblock %}
@@ -31,7 +35,7 @@
 				UNIFIED CLOUD
 			</h2>
 		</div>
-		<div class="w3-bar w3-blue w3-card-4 w3-round-large w3-margin-bottom">
+		<div class="w3-bar w3-blue w3-card-4 w3-round-large">
 			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block initialize_button %}{% endblock %}" style="width:14.28%" href="/initialize/">Initialize</a>
 			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_bucket_button %}{% endblock %}" style="width:14.28%" href="/list_bucket/">List Bucket</a>
 			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block create_bucket_button %}{% endblock %}" style="width:14.28%" href="/create_bucket/">Create Bucket</a>
