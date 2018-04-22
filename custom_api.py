@@ -319,7 +319,7 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Downloaded!";'
             except Exception:
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Error!";'
-    return shared.download_info
+    return None
 
 def delete_object(platform, file_source_bucket, delete_file):
     # Google
