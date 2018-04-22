@@ -155,12 +155,6 @@ def download():
     t1.join()
     t2.join()
     t3.join()
-
-
-
-
-
-
 #    # add a '.' in front of filename to hide the file in macOS
 #    file_path = temp_file_folder + download_file
 #    # download

@@ -300,25 +300,25 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
                 object_contents.seek(0) # the beginning of the file
                 dst_uri.new_key().set_contents_from_file(object_contents)
                 object_contents.close()
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "Downloaded!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "<i class=\'fa fa-check-circle\' style=\'color:green\'></i>";'
             except Exception:
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "Error!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "<i class=\'fa fa-exclamation-circle\' style=\'color:red\'></i>";'
     # Azure
     elif platform == 'Azure':
         for x in range(len(file_source_bucket)):
             try:
                 azure.get_blob_to_path(file_source_bucket[x], download_file[x], destination_path + download_file[x])
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "Downloaded!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-check-circle\' style=\'color:green\'></i>";'
             except Exception:
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "Error!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-exclamation-circle\' style=\'color:red\'></i>";'
     # AWS
     else:
         for x in range(len(file_source_bucket)):
             try:
                 s3.Bucket(file_source_bucket[x]).download_file(download_file[x], destination_path + download_file[x])
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Downloaded!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-check-circle\' style=\'color:green\'></i>";'
             except Exception:
-                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Error!";'
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-exclamation-circle\' style=\'color:red\'></i>";'
     return None
 
 def delete_object(platform, file_source_bucket, delete_file):

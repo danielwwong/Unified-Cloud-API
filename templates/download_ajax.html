@@ -31,7 +31,7 @@
 				}
 				form.append("input_password", password);
 				for (var i = 0; i < platform.length; i++) {
-					document.getElementById(file_source_bucket[i] + "_" + download_file[i] + "_" + platform[i]).innerHTML = "<i class='fa fa-refresh fa-spin' style='font-size:24px'></i>";
+					document.getElementById(file_source_bucket[i] + "_" + download_file[i] + "_" + platform[i]).innerHTML = "<i class='fa fa-refresh fa-spin'></i>";
 				}
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
@@ -103,5 +103,4 @@
 		</div>
 		Password for Decryption: <input type="password" id="input_password"><br>
 		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
-		<div id="information"></div>
 {% endblock %}
