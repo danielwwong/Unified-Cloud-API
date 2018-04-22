@@ -39,18 +39,16 @@
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						eval(this.responseText)
-						// var link = "/download_files/" + download_file;
-						// download(link, download_file);
 					}
 				}
 				xhr.send(form);
 			}
-			function download(name, download_name) {
+			function download() {
 				var element = document.createElement("a");
 				element.style.display = 'none';
 				document.body.appendChild(element);
-				element.setAttribute("href", name);
-				element.setAttribute("download", download_name);
+				element.setAttribute("href", "/download_files");
+				element.setAttribute("download", "DownloadedFiles.zip");
 				element.click();
 				document.body.removeChild(element);
 			}

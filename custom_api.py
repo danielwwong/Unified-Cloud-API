@@ -214,12 +214,15 @@ def decrypt_file(file_path, password, download_file, username):
 
 def zip_file(folder_path):
     try:
-        files = glob.glob(folder_path + '*')
-        zip_archive = zipfile.ZipFile(folder_path + 'DownloadedFiles.zip', 'w', zipfile.ZIP_DEFLATED, allowZip64 = True)
-        for file in files:
-            zip_archive.write(file, '/DownloadedFiles/' + os.path.basename(file))
-        zip_archive.close()
-        info = 'Successfully Zipped ' + folder_path
+        if len([f for f in os.listdir(folder_path) if not f.startswith('.')]) != 0:
+            files = glob.glob(folder_path + '*')
+            zip_archive = zipfile.ZipFile(folder_path + 'DownloadedFiles.zip', 'w', zipfile.ZIP_DEFLATED, allowZip64 = True)
+            for file in files:
+                zip_archive.write(file, '/DownloadedFiles/' + os.path.basename(file))
+            zip_archive.close()
+            info = 'Successfully Zipped ' + folder_path
+        else:
+            info = 'Empty Folder!'
     except Exception as e:
         info = 'Failed to Zip: ' + str(e)
     return info
@@ -325,6 +328,10 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
             except Exception:
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+                try:
+                    os.remove(destination_path + download_file[x])
+                except Exception:
+                    pass
     # AWS
     else:
         for x in range(len(file_source_bucket)):

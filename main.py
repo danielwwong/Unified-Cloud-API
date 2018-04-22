@@ -168,7 +168,7 @@ def download():
     info = custom_api.zip_file(temp_file_folder)
     for x in range(len(platform)):
         if info.startswith('S'):
-            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-file-archive-o fa-fw\' style=\'font-size:24px;color:green\'></i>";'
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-file-archive-o fa-fw\' style=\'font-size:24px;color:green\'></i>";' + 'var link = "/download_files/" + download_file;' + 'download();'
         else:
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     return shared.download_info
@@ -209,9 +209,9 @@ def download_ajax():
         google_info = 0
     return render_template('download_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
 
-@app.route('/download_files/<filename>', methods = ['GET'])
-def download_files(filename):
-    return app.send_static_file('temp/' + filename)
+@app.route('/download_files/', methods = ['GET'])
+def download_files():
+    return app.send_static_file('temp/DownloadedFiles.zip')
 
 @app.route('/delete/', methods = ['GET', 'POST'])
 def delete():
