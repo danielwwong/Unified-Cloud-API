@@ -121,6 +121,14 @@ def list_object():
 
 @app.route('/download/', methods = ['POST'])
 def download():
+    # clear temp folder
+    folder_files = [f for f in custom_api.os.listdir(temp_file_folder) if not f.startswith('.')]
+    if len(folder_files) != 0:
+        for file in folder_files:
+            try:
+                custom_api.os.remove(temp_file_folder + file)
+            except Exception:
+                pass
     # get selected download information from frontend
     platform = request.form.getlist('platform[]')
     file_source_bucket = request.form.getlist('file_source_bucket[]')
