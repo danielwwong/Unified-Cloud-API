@@ -143,6 +143,7 @@ def download():
         else:
             aws_file_source_bucket.append(file_source_bucket[x])
             aws_download_file.append(download_file[x])
+    # add a '.' in front of filename to hide the file in macOS
     # download
     shared.download_info = ''
     # multithreading, one platform one thread
@@ -155,15 +156,21 @@ def download():
     t1.join()
     t2.join()
     t3.join()
-    # add a '.' in front of filename to hide the file in macOS
+    # decryption
     for x in range(len(platform)):
         file_path = temp_file_folder + download_file[x]
-        # decryption
         info = custom_api.decrypt_file(file_path, password, download_file[x], username)
         if info.startswith('S'):
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-unlock fa-fw\' style=\'font-size:24px;color:sienna\'></i>";'
         else:
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-lock fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+    # zip
+    info = custom_api.zip_file(temp_file_folder)
+    for x in range(len(platform)):
+        if info.startswith('S'):
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-file-archive-o fa-fw\' style=\'font-size:24px;color:sienna\'></i>";'
+        else:
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     return shared.download_info
 
 @app.route('/download_ajax/')

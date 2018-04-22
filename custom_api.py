@@ -14,6 +14,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
 import base64
+import zipfile
+import glob
 
 def initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key):
     global google_storage, local_file, google_header_values, azure, s3, s3_client
@@ -208,6 +210,18 @@ def decrypt_file(file_path, password, download_file, username):
         info = 'Successfully Decrypted ' + str(download_file)
     except Exception as e:
         info = 'Failed to Decrypt: ' + str(e)
+    return info
+
+def zip_file(folder_path):
+    try:
+        files = glob.glob(folder_path + '*')
+        zip_archive = zipfile.ZipFile(folder_path + 'DownloadedFiles.zip', 'w', zipfile.ZIP_DEFLATED, allowZip64 = True)
+        for file in files:
+            zip_archive.write(file, '/DownloadedFiles/' + os.path.basename(file))
+        zip_archive.close()
+        info = 'Successfully Zipped ' + folder_path
+    except Exception as e:
+        info = 'Failed to Zip: ' + str(e)
     return info
 
 def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
