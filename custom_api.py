@@ -1,3 +1,4 @@
+import shared
 import boto
 import gcs_oauth2_boto_plugin
 import os
@@ -287,35 +288,38 @@ def list_object(page, google_bucket_name, azure_container_name, aws_bucket_name,
         aws_info = ''
     return google_info, azure_info, aws_info
 
-download_info = ''
-
 def download_object(platform, file_source_bucket, destination_path, download_file):
-    global download_info
     # Google
     if platform == 'Google':
-        src_uri = boto.storage_uri(file_source_bucket + '/' + download_file, google_storage)
-        object_contents = StringIO.StringIO() # a file-like object for holding the object contents
-        src_uri.get_key().get_file(object_contents) # writes the contents to object_contents
-        dst_uri = boto.storage_uri(os.path.join(destination_path, download_file), local_file)
-        object_contents.seek(0) # the beginning of the file
-        dst_uri.new_key().set_contents_from_file(object_contents)
-        object_contents.close()
-        download_info = download_info + 'Successfully Downloaded ' + download_file + ' from Google://' + file_source_bucket
+        for x in range(len(file_source_bucket)):
+            try:
+                src_uri = boto.storage_uri(file_source_bucket[x] + '/' + download_file[x], google_storage)
+                object_contents = StringIO.StringIO() # a file-like object for holding the object contents
+                src_uri.get_key().get_file(object_contents) # writes the contents to object_contents
+                dst_uri = boto.storage_uri(os.path.join(destination_path, download_file[x]), local_file)
+                object_contents.seek(0) # the beginning of the file
+                dst_uri.new_key().set_contents_from_file(object_contents)
+                object_contents.close()
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "Downloaded!";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "Error!";'
     # Azure
     elif platform == 'Azure':
-        azure.get_blob_to_path(file_source_bucket, download_file, destination_path + download_file)
-        download_info = download_info + 'Successfully Downloaded ' + download_file + ' from Azure://' + file_source_bucket
+        for x in range(len(file_source_bucket)):
+            try:
+                azure.get_blob_to_path(file_source_bucket[x], download_file[x], destination_path + download_file[x])
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "Downloaded!";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "Error!";'
     # AWS
-    elif platform == 'AWS':
-        try:
-            s3.Bucket(file_source_bucket).download_file(download_file, destination_path + download_file)
-            download_info = download_info + 'Successfully Downloaded ' + download_file + ' from AWS://' + file_source_bucket
-        except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                download_info = download_info + 'The object does not exist.'
-            else:
-                raise
-    return download_info
+    else:
+        for x in range(len(file_source_bucket)):
+            try:
+                s3.Bucket(file_source_bucket[x]).download_file(download_file[x], destination_path + download_file[x])
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Downloaded!";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "Error!";'
+    return shared.download_info
 
 def delete_object(platform, file_source_bucket, delete_file):
     # Google

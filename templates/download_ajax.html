@@ -8,8 +8,12 @@
 				var platform = [];
 				var file_source_bucket = [];
 				var download_file = [];
+				var status_tags = document.getElementsByName("statusTag");
+				for (var i = 0; i < status_tags.length; i++) {
+					status_tags[i].innerHTML = "";
+				}
 				for (var i = 0; i < checkboxes.length; i++) {
-					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked) {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].value != "all_check") {
 						platform.push(checkboxes[i].name);
 						file_source_bucket.push(checkboxes[i].value);
 						download_file.push(checkboxes[i].id);
@@ -26,17 +30,17 @@
 					form.append("download_file[]", download_file[i]);
 				}
 				form.append("input_password", password);
+				for (var i = 0; i < platform.length; i++) {
+					document.getElementById(file_source_bucket[i] + "_" + download_file[i] + "_" + platform[i]).innerHTML = "<i class='fa fa-refresh fa-spin' style='font-size:24px'></i>";
+				}
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						information.innerHTML = this.responseText;
+						eval(this.responseText)
 						// var link = "/download_files/" + download_file;
 						// download(link, download_file);
-					}
-					else {
-						information.innerHTML = "Running...";
 					}
 				}
 				xhr.send(form);
@@ -58,6 +62,12 @@
 					checkbox.checked = true;
 				}
 			}
+			function check_all_boxes(checkbox) {
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				for (var i = 0; i < checkboxes.length; i++) {
+					checkboxes[i].checked = checkbox.checked;
+				}
+			}
 		</script>
 {% endblock %}
 {% block download_button %}w3-light-blue{% endblock %}
@@ -67,10 +77,11 @@
 			<table class="w3-table-all w3-card-4" id="object_table">
 				<thead>
 					<tr class="w3-blue">
-						<th></th>
+						{% if google == 0 %}<th></th>{% else %}<th><input class="w3-check" type="checkbox" name="check_all" value="all_check" onclick="check_all_boxes(this);"></th>{% endif %}
 						<th>Object</th>
 						<th>Bucket/Container</th>
 						<th>Platform</th>
+						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -78,6 +89,7 @@
 					<tr class="w3-hover-light-blue">
 						<td></td>
 						<td>No Objects!</td>
+						<td></td>
 						<td></td>
 						<td></td>
 					</tr>
