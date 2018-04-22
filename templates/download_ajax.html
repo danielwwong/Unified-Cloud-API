@@ -3,60 +3,110 @@
 		<title>Download Object</title>
 		<script type="text/javascript">
 			function DownloadFile() {
-				// get inputs
-				var platform_list = document.getElementsByName("platform");
-				for (var i = 0; i < platform_list.length; i++) {
-					if (platform_list[i].checked) {
-						var platform = platform_list[i].value;
-						break;
+				// get checked objects' information
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				var platform = [];
+				var file_source_bucket = [];
+				var download_file = [];
+				var status_tags = document.getElementsByName("statusTag");
+				for (var i = 0; i < status_tags.length; i++) {
+					status_tags[i].innerHTML = "";
+				}
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].name != "check_all") {
+						platform.push(checkboxes[i].name);
+						file_source_bucket.push(checkboxes[i].value);
+						download_file.push(checkboxes[i].id);
 					}
 				}
-				var file_source_bucket = document.getElementsByName("file_source_bucket")[0].value;
-				var download_file = document.getElementsByName("download_file")[0].value;
 				var password = document.getElementById("input_password").value;
 				// download controller
 				var FileController = "/download/";
 				// FormData
 				var form = new FormData();
-				form.append("platform", platform);
-				form.append("file_source_bucket", file_source_bucket);
-				form.append("download_file", download_file);
+				for (var i = 0; i < platform.length; i++) {
+					form.append("platform[]", platform[i]);
+					form.append("file_source_bucket[]", file_source_bucket[i]);
+					form.append("download_file[]", download_file[i]);
+				}
 				form.append("input_password", password);
+				for (var i = 0; i < platform.length; i++) {
+					document.getElementById(file_source_bucket[i] + "_" + download_file[i] + "_" + platform[i]).innerHTML = "<i class='fa fa-refresh fa-spin' style='font-size:24px'></i>";
+				}
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
-						information.innerHTML = this.responseText;
-						var link = "/download_files/" + download_file;
-						download(link, download_file);
-					}
-					else {
-						information.innerHTML = "Running...";
+						eval(this.responseText)
 					}
 				}
 				xhr.send(form);
 			}
-			function download(name, download_name) {
+			function download() {
 				var element = document.createElement("a");
 				element.style.display = 'none';
 				document.body.appendChild(element);
-				element.setAttribute("href", name);
-				element.setAttribute("download", download_name);
+				element.setAttribute("href", "/download_files");
+				element.setAttribute("download", "DownloadedFiles.zip");
 				element.click();
 				document.body.removeChild(element);
+			}
+			function check_checkbox(checkbox) {
+				if (checkbox.checked) {
+					checkbox.checked = false;
+				}
+				else {
+					checkbox.checked = true;
+				}
+			}
+			function check_all_boxes(checkbox) {
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				for (var i = 0; i < checkboxes.length; i++) {
+					checkboxes[i].checked = checkbox.checked;
+				}
 			}
 		</script>
 {% endblock %}
 {% block download_button %}w3-light-blue{% endblock %}
 {% block body %}
-		<h1>Download</h1>
-		<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
-		<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
-		<input type="radio" name="platform" id="check_aws" value="AWS"><label for="check_aws">Amazon S3</label><br>
-		Bucket/Container Name: <input type="text" name="file_source_bucket"><br>
-		Download Object Name: <input type="text" name="download_file"><br>
-		Password for Decryption: <input type="password" id="input_password"><br>
-		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
-		<div id="information"></div>
+		<div class="w3-container">
+			<table class="w3-table-all w3-card-4 w3-section w3-mycenter" id="object_table">
+				<thead>
+					<tr class="w3-blue">
+						{% if google == 0 %}<th></th>{% else %}<th><input class="w3-check" type="checkbox" name="check_all" value="all_check" onclick="check_all_boxes(this);"></th>{% endif %}
+						<th>Object</th>
+						<th>Bucket/Container</th>
+						<th>Platform</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if google == 0 %}
+					<tr class="w3-hover-light-blue">
+						<td></td>
+						<td>No Objects!</td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					{% else %}
+						{{ google|safe }}
+						{{ azure|safe }}
+						{{ aws|safe }}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+		<div class="w3-container w3-center w3-mycenter-small w3-light-gray w3-round-large w3-card-4 w3-margin-bottom">
+			<p>
+				<b>Password for Decryption:</b>
+			</p>
+			<p>
+				<input class="w3-input w3-round-large" type="password" id="input_password">
+			</p>
+			<p>
+				<button type="button" class="w3-button w3-ripple w3-round-large" onclick="DownloadFile();"><i class="fa fa-cloud-download fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+			</p>
+		</div>
 {% endblock %}
