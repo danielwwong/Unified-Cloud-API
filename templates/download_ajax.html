@@ -13,7 +13,7 @@
 					status_tags[i].innerHTML = "";
 				}
 				for (var i = 0; i < checkboxes.length; i++) {
-					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].value != "all_check") {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].name != "check_all") {
 						platform.push(checkboxes[i].name);
 						file_source_bucket.push(checkboxes[i].value);
 						download_file.push(checkboxes[i].id);
