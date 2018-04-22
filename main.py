@@ -126,7 +126,7 @@ def download():
     file_source_bucket = request.form.getlist('file_source_bucket[]')
     download_file = request.form.getlist('download_file[]')
     password = request.form['input_password']
-    # parse information into 3 platform
+    # parse information into 3 platforms
     google_file_source_bucket = []
     google_download_file = []
     azure_file_source_container = []
@@ -155,13 +155,15 @@ def download():
     t1.join()
     t2.join()
     t3.join()
-#    # add a '.' in front of filename to hide the file in macOS
-#    file_path = temp_file_folder + download_file
-#    # download
-#    info = custom_api.download_object(platform, file_source_bucket, temp_file_folder, download_file)
-#    # decryption
-#    info = info + '<br>' + custom_api.decrypt_file(file_path, password, download_file, username)
-#    return info
+    # add a '.' in front of filename to hide the file in macOS
+    for x in range(len(platform)):
+        file_path = temp_file_folder + download_file[x]
+        # decryption
+        info = custom_api.decrypt_file(file_path, password, download_file[x], username)
+        if info.startswith('S'):
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-unlock fa-fw\' style=\'font-size:24px;color:sienna\'></i>";'
+        else:
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-lock fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     return shared.download_info
 
 @app.route('/download_ajax/')
