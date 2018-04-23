@@ -1,5 +1,6 @@
 from TaskQueue import TaskQueue
 import threading
+import time
 # import random
 
 class scheduler():
@@ -7,17 +8,18 @@ class scheduler():
         self.google_queue = TaskQueue(-1,"Google",num_workers=num_workers)
         self.azure_queue = TaskQueue(-1,"Azure",num_workers=num_workers)
         self.amazon_queue = TaskQueue(-1,"Amazon",num_workers=num_workers)
+        self.maxID = 1
 
     def push_task(self, task):
-        g_size = google_queue.qsize()
-        m_size = azure_queue.qsize()
-        a_size = amazon_queue.size()
+        g_size = self.google_queue.qsize()
+        m_size = self.azure_queue.qsize()
+        a_size = self.amazon_queue.qsize()
         if (g_size < m_size and g_size < a_size):
-            google_queue.put(task)
+            self.google_queue.put(task)
         elif m_size < a_size:
-            azure_queue.put(task)
-        else :
-            amazon_queue.put(task)
+            self.azure_queue.put(task)
+        else:
+            self.amazon_queue.put(task)
 
 
     def task2Json(self, mission, path, filename, platform, bucket):

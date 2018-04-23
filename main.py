@@ -90,17 +90,21 @@ def list_bucket():
 
 @app.route('/upload/', methods = ['POST'])
 def upload():
-    f = request.files['file_path']
+    f = request.files.getlist('file_path[]')
     google_upload_bucket = request.form['google_upload_bucket']
     azure_upload_container = request.form['azure_upload_container']
     aws_upload_bucket = request.form['aws_upload_bucket']
+    arg = ''
     # add a '.' in front of filename to hide the file in macOS
-    backup_file_path = backup_file_folder + f.filename
-    f.save(backup_file_path)
-    # encrypt file
-    custom_api.encrypt_file(backup_file_path, username)
-    # upload
-    scheduler.input("upload", backup_file_path, f.filename, platform, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+    for x in range(len(f)):
+        backup_file_path = backup_file_folder + f[x].filename
+        f[x].save(backup_file_path)
+        # encrypt file
+        custom_api.encrypt_file(backup_file_path, username)
+        # upload
+        scheduler.input('upload', backup_file_path, f[x].filename, arg, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+    info = ''
+    return info
 
 
 @app.route('/upload_ajax/')

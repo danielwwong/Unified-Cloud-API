@@ -230,7 +230,7 @@ def zip_file(folder_path):
 
 def upload_object(backup_file_path, filename, platform, upload_container):
     # Google
-    if platform == "Google":
+    if platform == 'Google':
         google_info = ''
         with open(backup_file_path, 'r') as google_file:
             dst_uri = boto.storage_uri(upload_container[0] + '/' + filename, google_storage)
@@ -240,14 +240,14 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         print google_info
         return google_info
     # Azure
-    elif platform == "Azure":
+    elif platform == 'Azure':
         azure_info = ''
         azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
         azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
         print azure_info
         return azure_info
     # AWS
-    elif platform == "AWS":
+    else:
         aws_info = ''
         with open(backup_file_path, 'r') as aws_file:
             s3.Object(upload_container[2], filename).put(Body = aws_file)

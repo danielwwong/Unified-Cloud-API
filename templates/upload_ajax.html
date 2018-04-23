@@ -26,7 +26,7 @@
 					}
 				}
 				// get file element
-				var fileObj = document.getElementById("file_path").files[0];
+				var fileObj = document.getElementById("file_path").files;
 				// upload controller
 				var FileController = "/upload/";
 				// FormData
@@ -34,7 +34,9 @@
 				form.append("google_upload_bucket", g_bucket);
 				form.append("azure_upload_container", a_container);
 				form.append("aws_upload_bucket", a_bucket);
-				form.append("file_path", fileObj);
+				for (var i = 0; i < fileObj.length; i++) {
+					form.append("file_path[]", fileObj[i]);
+				}
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
@@ -83,7 +85,7 @@
 		</script>
 		</p>
 		Select File:<br>
-		<input type="file" id="file_path"><br>
+		<input type="file" id="file_path" multiple><br>
 		<input type="button" onclick="UploadFile();" value="Upload">
 		<progress id="progressBar" value="0" max="100"></progress>
 		<span id="percentage"></span>
