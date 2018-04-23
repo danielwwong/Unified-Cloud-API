@@ -3,7 +3,7 @@ import shared
 import custom_api
 import threading
 import time
-import scheduler
+from scheduler import scheduler
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
