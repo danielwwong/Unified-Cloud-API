@@ -16,6 +16,7 @@ from Crypto.Cipher import AES, PKCS1_OAEP
 import base64
 import zipfile
 import glob
+import time
 
 def initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key):
     global google_storage, local_file, google_header_values, azure, s3, s3_client
@@ -238,14 +239,16 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
         google_file.close()
         print google_info
-        return google_info
+        task = {"info": google_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": dst_uri.bucket_name}
+        return task
     # Azure
     elif platform == 'Azure':
         azure_info = ''
         azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
         azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
         print azure_info
-        return azure_info
+        task = {"info": azure_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[1]}
+        return task
     # AWS
     else:
         aws_info = ''
@@ -255,8 +258,8 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
         aws_file.close()
         print aws_info
-        return aws_info
-
+        task = {"info": aws_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[2]}
+        return task
 
 # def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
 #     # Google

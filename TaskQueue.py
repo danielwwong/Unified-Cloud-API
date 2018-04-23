@@ -3,6 +3,7 @@ import Queue
 import time
 import custom_api
 import random
+import shared
 
 class TaskQueue(Queue.Queue):
     def __init__(self, size, platform, num_workers=1 ):
@@ -37,9 +38,10 @@ class worker(threading.Thread):
             # print("task recv:%s ,task No:%d" % (task[0], task[1]))
 
 
-            self.excute(task)
+            result = self.excute(task)
 
             print("work finished!")
+            shard.upload_info.append(result)
             q.task_done()  # finish
             res = q.qsize()  # size
             if res > 0:
@@ -50,14 +52,14 @@ class worker(threading.Thread):
         mission = task["mission"]
 
         platform = self.queue.platform  # = task["platform"]
-        time.sleep(2)
-        print("i am working on "+ mission + str(task["id"]))
+        result = ""
         if mission == "upload" :
-            custom_api.upload_object(task["path"], task["file_name"],platform ,task["bucket"])
+            result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
         elif  mission == "delete":
-            custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+            result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
         elif mission == "download": 
-            custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+            result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+        return result
 
 
     def stop(self):
