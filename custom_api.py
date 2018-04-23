@@ -344,28 +344,25 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
 
 def delete_object(platform, file_source_bucket, delete_file):
     # Google
-    google_info = ''
-    if platform[0] == 'on':
+    if platform == 'Google':
         try:
-            uri = boto.storage_uri(file_source_bucket[0] + '/' + delete_file[0], google_storage)
+            uri = boto.storage_uri(file_source_bucket + '/' + delete_file, google_storage)
             uri.delete_key()
-            google_info = 'Google: Deleted Object ' + str(file_source_bucket[0]) + '/' + str(delete_file[0]) + '<br>'
+            info = 'Google: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as g_e:
-            google_info = 'Failed to Delete Object in Google: ' + str(g_e) + '<br>'
+            info = 'Failed to Delete Object in Google: ' + str(g_e) + '<br>'
     # Azure
-    azure_info = ''
-    if platform[1] == 'on':
+    if platform == 'Azure':
         try:
-            azure.delete_blob(file_source_bucket[1], delete_file[1])
-            azure_info = 'Azure: Deleted Object ' + str(file_source_bucket[1]) + '/' + str(delete_file[1]) + '<br>'
+            azure.delete_blob(file_source_bucket, delete_file)
+            info = 'Azure: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as m_e:
-            azure_info = 'Failed to Delete Object in Azure: ' + str(m_e) + '<br>'
+            info = 'Failed to Delete Object in Azure: ' + str(m_e) + '<br>'
     # AWS
-    aws_info = ''
-    if platform[2] == 'on':
+    if platform == 'AWS':
         try:
-            s3.Object(file_source_bucket[2], delete_file[2]).delete()
-            aws_info = 'AWS: Deleted Object ' + str(file_source_bucket[2]) + '/' + str(delete_file[2]) + '<br>'
+            s3.Object(file_source_bucket, delete_file).delete()
+            info = 'AWS: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as a_e:
-            aws_info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
-    return google_info, azure_info, aws_info
+            info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
+    return info

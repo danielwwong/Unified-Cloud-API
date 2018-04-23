@@ -221,26 +221,38 @@ def download_ajax():
 def download_files():
     return app.send_static_file('temp/DownloadedFiles.zip')
 
-@app.route('/delete/', methods = ['GET', 'POST'])
-def delete():
-    if request.method == 'POST':
-        google_platform_check = request.form.get('google_platform')
-        azure_platform_check = request.form.get('azure_platform')
-        aws_platform_check = request.form.get('aws_platform')
-        platform = [google_platform_check, azure_platform_check, aws_platform_check]
-        google_bucket = request.form['google_bucket_name']
-        azure_container = request.form['azure_container_name']
-        aws_bucket = request.form['aws_bucket_name']
-        file_source_bucket = [google_bucket, azure_container, aws_bucket]
-        google_file = request.form['google_object_name']
-        azure_file = request.form['azure_object_name']
-        aws_file = request.form['aws_object_name']
-        delete_file = [google_file, azure_file, aws_file]
-        google_info, azure_info, aws_info = custom_api.delete_object(platform, file_source_bucket, delete_file)
-        flag = 1
-        return render_template('delete_object.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
-    else:
-        return render_template('delete_object.html')
+#@app.route('/delete/', methods = ['GET', 'POST'])
+#def delete():
+#    if request.method == 'POST':
+#        google_platform_check = request.form.get('google_platform')
+#        azure_platform_check = request.form.get('azure_platform')
+#        aws_platform_check = request.form.get('aws_platform')
+#        platform = [google_platform_check, azure_platform_check, aws_platform_check]
+#        google_bucket = request.form['google_bucket_name']
+#        azure_container = request.form['azure_container_name']
+#        aws_bucket = request.form['aws_bucket_name']
+#        file_source_bucket = [google_bucket, azure_container, aws_bucket]
+#        google_file = request.form['google_object_name']
+#        azure_file = request.form['azure_object_name']
+#        aws_file = request.form['aws_object_name']
+#        delete_file = [google_file, azure_file, aws_file]
+#        google_info, azure_info, aws_info = custom_api.delete_object(platform, file_source_bucket, delete_file)
+#        flag = 1
+#        return render_template('delete_object.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+#    else:
+#        return render_template('delete_object.html')
+
+@app.route('/delete_controller/', methods = ['POST'])
+def delete_controller():
+    # get selected download information from frontend
+    platform = request.form.getlist('platform[]')
+    file_source_bucket = request.form.getlist('file_source_bucket[]')
+    delete_file = request.form.getlist('delete_file[]')
+    # delete
+    for x in range(len(platform)):
+        custom_api.delete_object(platform[x], file_source_bucket[x], delete_file[x])
+    info = 'Successfully Performed Deletion!'
+    return info
 
 #@app.route('/delete_private_key/', methods = ['POST'])
 #def delete_private_key():
