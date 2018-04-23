@@ -2,7 +2,24 @@
 {% block head %}
 		<title>Download Object</title>
 		<script type="text/javascript">
-			function DownloadFile() {
+			function get_password() {
+				swal("Password for Decryption:", {
+					content: {
+						element: "input",
+						attributes: {
+							type: "password",
+						},
+					},
+					icon: "info",
+					buttons: ['Cancel', 'OK'],
+				})
+				.then((value) => {
+					if (value != null) {
+						DownloadFile(value);
+					}
+				});
+			}
+			function DownloadFile(password) {
 				// disable delete button
 				document.getElementById("delete_button").disable = true;
 				// get checked objects' information
@@ -21,7 +38,6 @@
 						download_file.push(checkboxes[i].id);
 					}
 				}
-				var password = document.getElementById("input_password").value;
 				// download controller
 				var FileController = "/download/";
 				// FormData
@@ -156,13 +172,12 @@
 			<div class="w3-my-col-container">
 				<div class="w3-my-col">
 					<p>
-						<b>Password for Decryption:</b>
+						<a class="w3-button w3-ripple w3-round-large" href="/upload_ajax/"><i class="fa fa-cloud-upload fa-fw" style="font-size:36px;color:#2196f3"></i></a>
 					</p>
+				</div>
+				<div class="w3-my-col">
 					<p>
-						<input class="w3-input w3-round-large" type="password" id="input_password">
-					</p>
-					<p>
-						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="DownloadFile();" id="download_button"><i class="fa fa-cloud-download fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="get_password();" id="download_button"><i class="fa fa-cloud-download fa-fw" style="font-size:36px;color:#2196f3"></i></button>
 					</p>
 				</div>
 				<div class="w3-my-col">
