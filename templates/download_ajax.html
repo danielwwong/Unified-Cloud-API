@@ -69,6 +69,20 @@
 					checkboxes[i].checked = checkbox.checked;
 				}
 			}
+			function confirm_delete() {
+				swal({
+					title: "Delete selected objects?",
+					text: "You can't undo this action. Are you sure you want to permanently delete the seleted objects?",
+					icon: "warning",
+					buttons: true,
+					dangerMode: true,
+				})
+				.then((value) => {
+					if (value) {
+						DeleteObject();
+					}
+				});
+			}
 			function DeleteObject() {
 				// disable download button
 				document.getElementById("download_button").disable = true;
@@ -153,7 +167,7 @@
 				</div>
 				<div class="w3-my-col">
 					<p>
-						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="DeleteObject();" id="delete_button"><i class="fa fa-trash fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="confirm_delete();" id="delete_button"><i class="fa fa-trash fa-fw" style="font-size:36px;color:#2196f3"></i></button>
 					</p>
 					<p id="dynamic_delete_section" style="display:none">
 						<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>
