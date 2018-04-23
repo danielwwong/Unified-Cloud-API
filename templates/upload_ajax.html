@@ -2,22 +2,6 @@
 {% block head %}
 		<title>UploadAjax</title>
 		<script type="text/javascript">
-			function InsertInput(checkbox) {
-				if (checkbox.checked) {
-					var input = document.createElement("input");
-					input.type = "password";
-					input.id = "input_password";
-					var div = document.createElement("div");
-					div.id = "input_password_text";
-					div.innerHTML = "Password for Encryption: ";
-					document.getElementById("dynamic_input").appendChild(div);
-					document.getElementById("dynamic_input").appendChild(input);
-				}
-				else {
-					document.getElementById("input_password_text").remove();
-					document.getElementById("input_password").remove();
-				}
-			}
 			function UploadFile() {
 				// get bucket/container name
 				var g_bucket_list = document.getElementsByName("google_upload_bucket");
@@ -43,16 +27,6 @@
 				}
 				// get file element
 				var fileObj = document.getElementById("file_path").files[0];
-				var check = document.getElementsByName("encryption_check")[0];
-				if (check.checked) {
-					var check_encrypt = "on";
-				}
-				else {
-					var check_encrypt = "None";
-				}
-				if (check_encrypt == "on") {
-					var password = document.getElementById("input_password").value;
-				}
 				// upload controller
 				var FileController = "/upload/";
 				// FormData
@@ -61,31 +35,12 @@
 				form.append("azure_upload_container", a_container);
 				form.append("aws_upload_bucket", a_bucket);
 				form.append("file_path", fileObj);
-				form.append("encryption_check", check_encrypt);
-				form.append("input_password", password);
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
 				xhr.onreadystatechange = function() {
 					if (this.readyState == 4 && this.status == 200) {
 						information.innerHTML = this.responseText;
-						if (check_encrypt == "on") {
-							var link = "/download_keys/private/";
-							var download_name = "rsa_private_key.bin";
-							download(link, download_name);
-							information_private_key.innerHTML = "You have 5 seconds to save the private key!"
-							setTimeout(delete_private_key, 5000);
-							function delete_private_key() {
-								var xhr2 = new XMLHttpRequest();
-								xhr2.open("post", "/delete_private_key/");
-								xhr2.send();
-								xhr2.onreadystatechange = function() {
-									if (this.readyState == 4 && this.status == 200) {
-										information_private_key.innerHTML = this.responseText;
-									}
-								}
-							}
-						}
 					}
 					else {
 						information.innerHTML = "Running...";
@@ -93,15 +48,6 @@
 				}
 				xhr.upload.addEventListener("progress", progressFunction, false);
 				xhr.send(form);
-			}
-			function download(name, download_name) {
-				var element = document.createElement("a");
-				element.style.display = 'none';
-				document.body.appendChild(element);
-				element.setAttribute("href", name);
-				element.setAttribute("download", download_name);
-				element.click();
-				document.body.removeChild(element);
 			}
 			function progressFunction(evt) {
 				var progressBar = document.getElementById("progressBar");
@@ -138,12 +84,6 @@
 		</p>
 		Select File:<br>
 		<input type="file" id="file_path"><br>
-		<input type="checkbox" name="encryption_check" id="if_encryption" onclick="InsertInput(this);" checked><label for="if_encryption">Encrypt</label>
-		<div id="dynamic_input"></div>
-		<script type="text/javascript">
-			InsertInput(document.getElementById("if_encryption"));
-		</script>
-		<br><br>
 		<input type="button" onclick="UploadFile();" value="Upload">
 		<progress id="progressBar" value="0" max="100"></progress>
 		<span id="percentage"></span>

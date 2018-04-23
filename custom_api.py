@@ -1,3 +1,4 @@
+import shared
 import boto
 import gcs_oauth2_boto_plugin
 import os
@@ -13,6 +14,8 @@ from Crypto.PublicKey import RSA
 from Crypto.Random import get_random_bytes
 from Crypto.Cipher import AES, PKCS1_OAEP
 import base64
+import zipfile
+import glob
 
 def initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key):
     global google_storage, local_file, google_header_values, azure, s3, s3_client
@@ -86,7 +89,6 @@ def create_bucket(google_bucket_name, azure_container_name, aws_bucket_name, goo
 
 def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
-    google_info = ''
     if google_platform_check == 'on':
         uri = boto.storage_uri('', google_storage)
         google_bucket_list = uri.get_all_buckets(headers = google_header_values)
@@ -94,28 +96,40 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             google_info = 'No Google Buckets!<br>'
         else:
             if page == 'upload_page':
+                google_info = ''
                 for bucket in google_bucket_list:
                     google_info = google_info + '<input type="radio" name="google_upload_bucket" id="g_' + str(bucket.name) + '" value="' + str(bucket.name) + '"><label for="g_' + str(bucket.name) + '">' + str(bucket.name) + '</label><br>'
+            elif page == 'download_page':
+                google_info = []
+                for bucket in google_bucket_list:
+                    google_info.append(str(bucket.name))
             else:
                 google_info = 'Google Buckets:<br>'
                 for bucket in google_bucket_list:
                     google_info = google_info + str(bucket.name) + '<br>'
+    else:
+        google_info = ''
     # Azure
-    azure_info = ''
     if azure_platform_check == 'on':
         container_list = azure.list_containers()
         if len(list(container_list)) == 0:
             azure_info = 'No Azure Containers!<br>'
         else:
             if page == 'upload_page':
+                azure_info = ''
                 for container in container_list:
                     azure_info = azure_info + '<input type="radio" name="azure_upload_container" id="m_' + str(container.name) + '" value="' + str(container.name) + '"><label for="m_' + str(container.name) + '">' + str(container.name) + '</label><br>'
+            elif page == 'download_page':
+                azure_info = []
+                for container in container_list:
+                    azure_info.append(str(container.name))
             else:
                 azure_info = 'Azure Containers:<br>'
                 for container in container_list:
                     azure_info = azure_info + str(container.name) + '<br>'
+    else:
+        azure_info = ''
     # AWS
-    aws_info = ''
     if aws_platform_check == 'on':
         response = s3_client.list_buckets()
         buckets = [bucket['Name'] for bucket in response['Buckets']]
@@ -123,37 +137,44 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             aws_info = 'No AWS Buckets!<br>'
         else:
             if page == 'upload_page':
+                aws_info = ''
                 for item in buckets:
                     aws_info = aws_info + '<input type="radio" name="aws_upload_bucket" id="a_' + str(item) + '" value="' + str(item) + '"><label for="a_' + str(item) + '">' + str(item) + '</label><br>'
+            elif page == 'download_page':
+                aws_info = []
+                for item in buckets:
+                    aws_info.append(str(item))
             else:
                 aws_info = 'AWS Buckets:<br>'
                 for item in buckets:
                     aws_info = aws_info + str(item) + '<br>'
+    else:
+        aws_info = ''
     return google_info, azure_info, aws_info
 
-def rsa_key(password):
+def rsa_key(password, username):
     key = RSA.generate(2048)
     encrypted_key = key.export_key(passphrase = password, pkcs = 8, protection = "scryptAndAES128-CBC")
     # private key
-    with open('static/temp/rsa_private_key.bin', 'wb') as file_out:
+    with open('static/keys/' + username + '.bin', 'wb') as file_out:
         file_out.write(encrypted_key)
     file_out.close()
     # public key
-    with open('static/temp/rsa_private_key.bin', 'rb') as encoded_key:
+    with open('static/keys/' + username + '.bin', 'rb') as encoded_key:
         key_2 = RSA.import_key(encoded_key, passphrase = password)
-        with open('static/temp/rsa_public_key.pem', 'wb') as file_out_2:
+        with open('static/keys/' + username + '.pem', 'wb') as file_out_2:
             file_out_2.write(key_2.publickey().export_key())
         file_out_2.close()
     encoded_key.close()
     return None
 
-def encrypt_file(backup_file_path):
+def encrypt_file(backup_file_path, username):
     data = ''
     with open(backup_file_path, 'rb') as file_read:
         data = file_read.read()
     file_read.close()
     with open(backup_file_path, 'wb') as file_output:
-        recipient_key = RSA.import_key(open('static/temp/rsa_public_key.pem').read())
+        recipient_key = RSA.import_key(open('static/keys/' + username + '.pem').read())
         session_key = get_random_bytes(16)
         # encrypt the session key with the public RSA key
         cipher_rsa = PKCS1_OAEP.new(recipient_key)
@@ -170,10 +191,10 @@ def encrypt_file(backup_file_path):
     # print 'Successfully Encrypted "%s"' % backup_file_path
     return None
 
-def decrypt_file(file_path, password, download_file):
+def decrypt_file(file_path, password, download_file, username):
     try:
         with open(file_path, 'rb') as f:
-            private_key = RSA.import_key(open('static/temp/rsa_private_key.bin').read(), passphrase = password)
+            private_key = RSA.import_key(open('static/keys/' + username + '.bin').read(), passphrase = password)
             enc_session_key, nonce, tag, ciphertext = [f.read(x) for x in (private_key.size_in_bytes(), 16, 16, -1)]
             # decrypt the session key with the private RSA key
             cipher_rsa = PKCS1_OAEP.new(private_key)
@@ -189,6 +210,21 @@ def decrypt_file(file_path, password, download_file):
         info = 'Successfully Decrypted ' + str(download_file)
     except Exception as e:
         info = 'Failed to Decrypt: ' + str(e)
+    return info
+
+def zip_file(folder_path):
+    try:
+        if len([f for f in os.listdir(folder_path) if not f.startswith('.')]) != 0:
+            files = glob.glob(folder_path + '*')
+            zip_archive = zipfile.ZipFile(folder_path + 'DownloadedFiles.zip', 'w', zipfile.ZIP_DEFLATED, allowZip64 = True)
+            for file in files:
+                zip_archive.write(file, '/DownloadedFiles/' + os.path.basename(file))
+            zip_archive.close()
+            info = 'Successfully Zipped ' + folder_path
+        else:
+            info = 'Empty Folder!'
+    except Exception as e:
+        info = 'Failed to Zip: ' + str(e)
     return info
 
 def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
@@ -212,79 +248,121 @@ def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload
     aws_file.close()
     return google_info, azure_info, aws_info
 
-def list_object(google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
+def list_object(page, google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
-    google_info = ''
     if google_platform_check == 'on':
         uri = boto.storage_uri(google_bucket_name, google_storage)
-        for g_obj in uri.get_bucket():
-            google_info = google_info + 'Google://' + str(uri.bucket_name) + '/' + str(g_obj.name) + '<br>'
+        google_object_list = uri.get_bucket()
+        i = 0
+        for key in google_object_list.list():
+            i += 1
+        if i == 0:
+            google_info = 'No Objects in This Google Bucket!<br>'
+        else:
+            if page == 'download_page':
+                google_info = []
+                for g_obj in google_object_list:
+                    google_info.append(str(g_obj.name))
+            else:
+                google_info = ''
+                for g_obj in google_object_list:
+                    google_info = google_info + 'Google://' + str(uri.bucket_name) + '/' + str(g_obj.name) + '<br>'
+    else:
+        google_info = ''
     # Azure
-    azure_info = ''
     if azure_platform_check == 'on':
         generator = azure.list_blobs(azure_container_name)
-        for blob in generator:
-            azure_info = azure_info + 'Azure://' + str(azure_container_name) + '/' + str(blob.name) + '<br>'
+        if len(list(generator)) == 0:
+            azure_info = 'No Objects in This Azure Container!<br>'
+        else:
+            if page == 'download_page':
+                azure_info = []
+                for blob in generator:
+                    azure_info.append(str(blob.name))
+            else:
+                azure_info = ''
+                for blob in generator:
+                    azure_info = azure_info + 'Azure://' + str(azure_container_name) + '/' + str(blob.name) + '<br>'
+    else:
+        azure_info = ''
     # AWS
-    aws_info = ''
     if aws_platform_check == 'on':
         bucket = s3.Bucket(aws_bucket_name)
-        for a_obj in bucket.objects.all():
-            aws_info = aws_info + 'AWS://' + str(a_obj.bucket_name) + '/' + str(a_obj.key) + '<br>'
+        aws_object_list = bucket.objects.all()
+        size = sum(1 for _ in aws_object_list)
+        if size == 0:
+            aws_info = 'No Objects in This Google Bucket!<br>'
+        else:
+            if page == 'download_page':
+                aws_info = []
+                for a_obj in aws_object_list:
+                    aws_info.append(str(a_obj.key))
+            else:
+                aws_info = ''
+                for a_obj in aws_object_list:
+                    aws_info = aws_info + 'AWS://' + str(a_obj.bucket_name) + '/' + str(a_obj.key) + '<br>'
+    else:
+        aws_info = ''
     return google_info, azure_info, aws_info
 
 def download_object(platform, file_source_bucket, destination_path, download_file):
-    info = ''
     # Google
     if platform == 'Google':
-        src_uri = boto.storage_uri(file_source_bucket + '/' + download_file, google_storage)
-        object_contents = StringIO.StringIO() # a file-like object for holding the object contents
-        src_uri.get_key().get_file(object_contents) # writes the contents to object_contents
-        dst_uri = boto.storage_uri(os.path.join(destination_path, download_file), local_file)
-        object_contents.seek(0) # the beginning of the file
-        dst_uri.new_key().set_contents_from_file(object_contents)
-        object_contents.close()
-        info = 'Successfully Downloaded ' + download_file + ' from Google://' + file_source_bucket
+        for x in range(len(file_source_bucket)):
+            try:
+                src_uri = boto.storage_uri(file_source_bucket[x] + '/' + download_file[x], google_storage)
+                object_contents = StringIO.StringIO() # a file-like object for holding the object contents
+                src_uri.get_key().get_file(object_contents) # writes the contents to object_contents
+                dst_uri = boto.storage_uri(os.path.join(destination_path, download_file[x]), local_file)
+                object_contents.seek(0) # the beginning of the file
+                dst_uri.new_key().set_contents_from_file(object_contents)
+                object_contents.close()
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Google").innerHTML = "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     # Azure
     elif platform == 'Azure':
-        azure.get_blob_to_path(file_source_bucket, download_file, destination_path + download_file)
-        info = 'Successfully Downloaded ' + download_file + ' from Azure://' + file_source_bucket
+        for x in range(len(file_source_bucket)):
+            try:
+                azure.get_blob_to_path(file_source_bucket[x], download_file[x], destination_path + download_file[x])
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_Azure").innerHTML = "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+                try:
+                    os.remove(destination_path + download_file[x])
+                except Exception:
+                    pass
     # AWS
-    elif platform == 'AWS':
-        try:
-            s3.Bucket(file_source_bucket).download_file(download_file, destination_path + download_file)
-            info = 'Successfully Downloaded ' + download_file + ' from AWS://' + file_source_bucket
-        except botocore.exceptions.ClientError as e:
-            if e.response['Error']['Code'] == "404":
-                info = 'The object does not exist.'
-            else:
-                raise
-    return info
+    else:
+        for x in range(len(file_source_bucket)):
+            try:
+                s3.Bucket(file_source_bucket[x]).download_file(download_file[x], destination_path + download_file[x])
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
+            except Exception:
+                shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+    return None
 
 def delete_object(platform, file_source_bucket, delete_file):
     # Google
-    google_info = ''
-    if platform[0] == 'on':
+    if platform == 'Google':
         try:
-            uri = boto.storage_uri(file_source_bucket[0] + '/' + delete_file[0], google_storage)
+            uri = boto.storage_uri(file_source_bucket + '/' + delete_file, google_storage)
             uri.delete_key()
-            google_info = 'Google: Deleted Object ' + str(file_source_bucket[0]) + '/' + str(delete_file[0]) + '<br>'
+            info = 'Google: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as g_e:
-            google_info = 'Failed to Delete Object in Google: ' + str(g_e) + '<br>'
+            info = 'Failed to Delete Object in Google: ' + str(g_e) + '<br>'
     # Azure
-    azure_info = ''
-    if platform[1] == 'on':
+    if platform == 'Azure':
         try:
-            azure.delete_blob(file_source_bucket[1], delete_file[1])
-            azure_info = 'Azure: Deleted Object ' + str(file_source_bucket[1]) + '/' + str(delete_file[1]) + '<br>'
+            azure.delete_blob(file_source_bucket, delete_file)
+            info = 'Azure: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as m_e:
-            azure_info = 'Failed to Delete Object in Azure: ' + str(m_e) + '<br>'
+            info = 'Failed to Delete Object in Azure: ' + str(m_e) + '<br>'
     # AWS
-    aws_info = ''
-    if platform[2] == 'on':
+    if platform == 'AWS':
         try:
-            s3.Object(file_source_bucket[2], delete_file[2]).delete()
-            aws_info = 'AWS: Deleted Object ' + str(file_source_bucket[2]) + '/' + str(delete_file[2]) + '<br>'
+            s3.Object(file_source_bucket, delete_file).delete()
+            info = 'AWS: Deleted Object ' + str(file_source_bucket) + '/' + str(delete_file) + '<br>'
         except Exception as a_e:
-            aws_info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
-    return google_info, azure_info, aws_info
+            info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
+    return info

@@ -11,6 +11,8 @@
 		<meta name="theme-color" content="#ffffff">
 		<link rel="stylesheet" href="{{ url_for('static', filename='css/w3.css')}}">
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 		<style>
 			.w3-myfont {
 				font-family: 'Abril Fatface', cursive;
@@ -18,6 +20,19 @@
 			.w3-mycenter {
 				width: 80%;
 				margin: 0 auto;
+			}
+			.w3-mycenter-small {
+				width: 50%;
+				margin: 0 auto;
+			}
+			.w3-my-col-container {
+				display: table;
+				width: 100%;
+			}
+			.w3-my-col {
+				display: table-cell;
+				padding: 16px;
+				vertical-align: middle;
 			}
 		</style>
 		{% block head %}
@@ -30,14 +45,13 @@
 				UNIFIED CLOUD
 			</h2>
 		</div>
-		<div class="w3-bar w3-blue w3-card-4 w3-round-large w3-margin-bottom">
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block initialize_button %}{% endblock %}" style="width:14.28%" href="/initialize/">Initialize</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_bucket_button %}{% endblock %}" style="width:14.28%" href="/list_bucket/">List Bucket</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block create_bucket_button %}{% endblock %}" style="width:14.28%" href="/create_bucket/">Create Bucket</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block upload_button %}{% endblock %}" style="width:14.28%" href="/upload_ajax/">Upload</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block download_button %}{% endblock %}" style="width:14.28%" href="/download_ajax/">Download</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_object_button %}{% endblock %}" style="width:14.28%" href="/list_object/">List Objects</a>
-			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block delete_button %}{% endblock %}" style="width:14.28%" href="/delete/">Delete Object</a>
+		<div class="w3-bar w3-blue w3-card-4 w3-round-large">
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block initialize_button %}{% endblock %}" style="width:16.66%" href="/initialize/">Initialize</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block download_button %}{% endblock %}" style="width:16.66%" href="/download_ajax/">Download</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block upload_button %}{% endblock %}" style="width:16.66%" href="/upload_ajax/">Upload</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block create_bucket_button %}{% endblock %}" style="width:16.66%" href="/create_bucket/">Create Bucket</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_bucket_button %}{% endblock %}" style="width:16.66%" href="/list_bucket/">List Bucket</a>
+			<a class="w3-bar-item w3-button w3-hover-light-blue w3-ripple {% block list_object_button %}{% endblock %}" style="width:16.66%" href="/list_object/">List Objects</a>
 		</div>
 		{% block body %}
 		{% endblock %}

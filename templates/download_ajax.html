@@ -2,91 +2,193 @@
 {% block head %}
 		<title>Download Object</title>
 		<script type="text/javascript">
-			function InsertInput(checkbox) {
-				if (checkbox.checked) {
-					var input = document.createElement("input");
-					input.type = "password";
-					input.id = "input_password";
-					var div = document.createElement("div");
-					div.id = "input_password_text";
-					div.innerHTML = "Password for Decryption: ";
-					document.getElementById("dynamic_input").appendChild(div);
-					document.getElementById("dynamic_input").appendChild(input);
-				}
-				else {
-					document.getElementById("input_password_text").remove();
-					document.getElementById("input_password").remove();
-				}
-			}
-			function DownloadFile() {
-				// get inputs
-				var platform_list = document.getElementsByName("platform");
-				for (var i = 0; i < platform_list.length; i++) {
-					if (platform_list[i].checked) {
-						var platform = platform_list[i].value;
-						break;
+			function get_password() {
+				swal("Password for Decryption:", {
+					content: {
+						element: "input",
+						attributes: {
+							type: "password",
+						},
+					},
+					icon: "info",
+					buttons: ['Cancel', 'OK'],
+				})
+				.then((value) => {
+					if (value != null) {
+						DownloadFile(value);
 					}
+				});
+			}
+			function DownloadFile(password) {
+				// disable delete button
+				document.getElementById("delete_button").disable = true;
+				// get checked objects' information
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				var platform = [];
+				var file_source_bucket = [];
+				var download_file = [];
+				var status_tags = document.getElementsByName("statusTag");
+				for (var i = 0; i < status_tags.length; i++) {
+					status_tags[i].innerHTML = "";
 				}
-				var file_source_bucket = document.getElementsByName("file_source_bucket")[0].value;
-				var download_file = document.getElementsByName("download_file")[0].value;
-				var check = document.getElementsByName("decryption_check")[0];
-				if (check.checked) {
-					var check_decrypt = "on";
-				}
-				else {
-					var check_decrypt = "None";
-				}
-				if (check_decrypt == "on") {
-					var password = document.getElementById("input_password").value;
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].name != "check_all") {
+						platform.push(checkboxes[i].name);
+						file_source_bucket.push(checkboxes[i].value);
+						download_file.push(checkboxes[i].id);
+					}
 				}
 				// download controller
 				var FileController = "/download/";
 				// FormData
 				var form = new FormData();
-				form.append("platform", platform);
-				form.append("file_source_bucket", file_source_bucket);
-				form.append("download_file", download_file);
-				form.append("decryption_check", check_decrypt);
+				for (var i = 0; i < platform.length; i++) {
+					form.append("platform[]", platform[i]);
+					form.append("file_source_bucket[]", file_source_bucket[i]);
+					form.append("download_file[]", download_file[i]);
+				}
 				form.append("input_password", password);
+				for (var i = 0; i < platform.length; i++) {
+					document.getElementById(file_source_bucket[i] + "_" + download_file[i] + "_" + platform[i]).innerHTML = "<i class='fa fa-refresh fa-spin' style='font-size:24px'></i>";
+				}
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
 				xhr.onreadystatechange = function() {
+					document.getElementById("delete_button").disable = false;
 					if (this.readyState == 4 && this.status == 200) {
-						information.innerHTML = this.responseText;
-						var link = "/download_files/" + download_file;
-						download(link, download_file);
-					}
-					else {
-						information.innerHTML = "Running...";
+						eval(this.responseText)
 					}
 				}
 				xhr.send(form);
 			}
-			function download(name, download_name) {
+			function download() {
 				var element = document.createElement("a");
 				element.style.display = 'none';
 				document.body.appendChild(element);
-				element.setAttribute("href", name);
-				element.setAttribute("download", download_name);
+				element.setAttribute("href", "/download_files");
+				element.setAttribute("download", "DownloadedFiles.zip");
 				element.click();
 				document.body.removeChild(element);
+			}
+			function check_checkbox(checkbox) {
+				if (checkbox.checked) {
+					checkbox.checked = false;
+				}
+				else {
+					checkbox.checked = true;
+				}
+			}
+			function check_all_boxes(checkbox) {
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				for (var i = 0; i < checkboxes.length; i++) {
+					checkboxes[i].checked = checkbox.checked;
+				}
+			}
+			function confirm_delete() {
+				swal({
+					title: "Delete selected objects?",
+					text: "You can't undo this action. Are you sure you want to permanently delete the seleted objects?",
+					icon: "warning",
+					buttons: true,
+					dangerMode: true,
+				})
+				.then((value) => {
+					if (value) {
+						DeleteObject();
+					}
+				});
+			}
+			function DeleteObject() {
+				// disable download button
+				document.getElementById("download_button").disable = true;
+				// get checked objects' information
+				var checkboxes = document.getElementById("object_table").getElementsByTagName("input");
+				var platform = [];
+				var file_source_bucket = [];
+				var delete_file = [];
+				for (var i = 0; i < checkboxes.length; i++) {
+					if (checkboxes[i].type == "checkbox" && checkboxes[i].checked && checkboxes[i].name != "check_all") {
+						platform.push(checkboxes[i].name);
+						file_source_bucket.push(checkboxes[i].value);
+						delete_file.push(checkboxes[i].id);
+					}
+				}
+				// delete controller
+				var FileController = "/delete_controller/";
+				// FormData
+				var form = new FormData();
+				for (var i = 0; i < platform.length; i++) {
+					form.append("platform[]", platform[i]);
+					form.append("file_source_bucket[]", file_source_bucket[i]);
+					form.append("delete_file[]", delete_file[i]);
+				}
+				document.getElementById("dynamic_delete_section").style.display = "block";
+				//XMLHttpRequest
+				var xhr = new XMLHttpRequest();
+				xhr.open("post", FileController, true);
+				xhr.onreadystatechange = function() {
+					document.getElementById("download_button").disable = false;
+					if (this.readyState == 4 && this.status == 200) {
+						document.getElementById("dynamic_delete_section").style.display = "none";
+						location.reload(true);
+					}
+				}
+				xhr.send(form);
 			}
 		</script>
 {% endblock %}
 {% block download_button %}w3-light-blue{% endblock %}
 {% block body %}
-		<h1>Download</h1>
-		<input type="radio" name="platform" id="check_google" value="Google" checked><label for="check_google">Google Cloud Storage</label><br>
-		<input type="radio" name="platform" id="check_azure" value="Azure"><label for="check_azure">Microsoft Azure</label><br>
-		<input type="radio" name="platform" id="check_aws" value="AWS"><label for="check_aws">Amazon S3</label><br>
-		Bucket/Container Name: <input type="text" name="file_source_bucket"><br>
-		Download Object Name: <input type="text" name="download_file"><br>
-		<input type="checkbox" name="decryption_check" id="if_decryption" onclick="InsertInput(this);" checked><label for="if_decryption">Decrypt</label>
-		<div id="dynamic_input"></div>
-		<script type="text/javascript">
-			InsertInput(document.getElementById("if_decryption"));
-		</script>
-		<input type="button" onclick="DownloadFile();" value="Download"><br><br>
-		<div id="information"></div>
+		<div class="w3-container">
+			<table class="w3-table-all w3-card-4 w3-section w3-mycenter" id="object_table">
+				<thead>
+					<tr class="w3-blue">
+						{% if google == 0 %}<th></th>{% else %}<th><input class="w3-check" type="checkbox" name="check_all" value="all_check" onclick="check_all_boxes(this);"></th>{% endif %}
+						<th>Object</th>
+						<th>Bucket/Container</th>
+						<th>Platform</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{% if google == 0 %}
+					<tr class="w3-hover-light-blue">
+						<td></td>
+						<td>No Objects!</td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					{% else %}
+						{{ google|safe }}
+						{{ azure|safe }}
+						{{ aws|safe }}
+					{% endif %}
+				</tbody>
+			</table>
+		</div>
+		<div class="w3-container w3-center w3-mycenter-small w3-light-gray w3-round-large w3-card-4 w3-margin-bottom">
+			<div class="w3-my-col-container">
+				<div class="w3-my-col">
+					<p>
+						<a class="w3-button w3-ripple w3-round-large" href="/upload_ajax/"><i class="fa fa-cloud-upload fa-fw" style="font-size:36px;color:#2196f3"></i></a>
+					</p>
+				</div>
+				<div class="w3-my-col">
+					<p>
+						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="get_password();" id="download_button"><i class="fa fa-cloud-download fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+					</p>
+				</div>
+				<div class="w3-my-col">
+					<p>
+						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="confirm_delete();" id="delete_button"><i class="fa fa-trash fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+					</p>
+					<p id="dynamic_delete_section" style="display:none">
+						<i class="fa fa-refresh fa-spin" style="font-size:24px"></i>
+						<b>Deleting...</b>
+					</p>
+				</div>
+			</div>
+		</div>
 {% endblock %}
