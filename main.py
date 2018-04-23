@@ -10,6 +10,7 @@ backup_file_folder = '/Users/danielwong/'
 basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
+scheduler = scheduler(num_workers=3)
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
