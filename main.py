@@ -3,14 +3,12 @@ import shared
 import custom_api
 import threading
 import time
-import scheduler
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
 basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
-scheduler = scheduler.scheduler(num_workers=3)
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
@@ -84,10 +82,9 @@ def upload():
     # encrypt file
     custom_api.encrypt_file(backup_file_path, username)
     # upload
-    scheduler.input("upload", backup_file_path, f.filename, platform, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
-    # google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
-    # info = google_info + '<br>' + azure_info + '<br>' + aws_info
-    # return info
+    google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
+    info = google_info + '<br>' + azure_info + '<br>' + aws_info
+    return info
 
 @app.route('/upload_ajax/')
 def upload_ajax():
@@ -95,7 +92,6 @@ def upload_ajax():
     azure_platform_check = 'on'
     aws_platform_check = 'on'
     page = 'upload_page'
-
     google_info, azure_info, aws_info = custom_api.list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check)
     return render_template('upload_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
 
@@ -225,6 +221,26 @@ def download_ajax():
 def download_files():
     return app.send_static_file('temp/DownloadedFiles.zip')
 
+#@app.route('/delete/', methods = ['GET', 'POST'])
+#def delete():
+#    if request.method == 'POST':
+#        google_platform_check = request.form.get('google_platform')
+#        azure_platform_check = request.form.get('azure_platform')
+#        aws_platform_check = request.form.get('aws_platform')
+#        platform = [google_platform_check, azure_platform_check, aws_platform_check]
+#        google_bucket = request.form['google_bucket_name']
+#        azure_container = request.form['azure_container_name']
+#        aws_bucket = request.form['aws_bucket_name']
+#        file_source_bucket = [google_bucket, azure_container, aws_bucket]
+#        google_file = request.form['google_object_name']
+#        azure_file = request.form['azure_object_name']
+#        aws_file = request.form['aws_object_name']
+#        delete_file = [google_file, azure_file, aws_file]
+#        google_info, azure_info, aws_info = custom_api.delete_object(platform, file_source_bucket, delete_file)
+#        flag = 1
+#        return render_template('delete_object.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
+#    else:
+#        return render_template('delete_object.html')
 
 @app.route('/delete_controller/', methods = ['POST'])
 def delete_controller():
