@@ -3,6 +3,7 @@ import shared
 import custom_api
 import threading
 import time
+import scheduler
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
@@ -70,6 +71,22 @@ def list_bucket():
     else:
         return render_template('list_bucket.html')
 
+# @app.route('/upload/', methods = ['POST'])
+# def upload():
+#     f = request.files['file_path']
+#     google_upload_bucket = request.form['google_upload_bucket']
+#     azure_upload_container = request.form['azure_upload_container']
+#     aws_upload_bucket = request.form['aws_upload_bucket']
+#     # add a '.' in front of filename to hide the file in macOS
+#     backup_file_path = backup_file_folder + f.filename
+#     f.save(backup_file_path)
+#     # encrypt file
+#     custom_api.encrypt_file(backup_file_path, username)
+#     # upload
+#     google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
+#     info = google_info + '<br>' + azure_info + '<br>' + aws_info
+#     return info
+
 @app.route('/upload/', methods = ['POST'])
 def upload():
     f = request.files['file_path']
@@ -82,9 +99,8 @@ def upload():
     # encrypt file
     custom_api.encrypt_file(backup_file_path, username)
     # upload
-    google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
-    info = google_info + '<br>' + azure_info + '<br>' + aws_info
-    return info
+    scheduler.input("upload", backup_file_path, f.filename, platform, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+
 
 @app.route('/upload_ajax/')
 def upload_ajax():

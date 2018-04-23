@@ -227,26 +227,57 @@ def zip_file(folder_path):
         info = 'Failed to Zip: ' + str(e)
     return info
 
-def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
+
+def upload_object(backup_file_path, filename, platform, upload_container):
     # Google
-    google_info = ''
-    with open(backup_file_path, 'r') as google_file:
-        dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
-        dst_uri.new_key().set_contents_from_file(google_file)
-    google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
-    google_file.close()
+    if platform == "Google":
+        google_info = ''
+        with open(backup_file_path, 'r') as google_file:
+            dst_uri = boto.storage_uri(upload_container[0] + '/' + filename, google_storage)
+            dst_uri.new_key().set_contents_from_file(google_file)
+        google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+        google_file.close()
+        print google_info
+        return google_info
     # Azure
-    azure_info = ''
-    azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
-    azure_info = 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!'
+    elif platform == "Azure":
+        azure_info = ''
+        azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
+        azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
+        print azure_info
+        return azure_info
     # AWS
-    aws_info = ''
-    with open(backup_file_path, 'r') as aws_file:
-        s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
-        s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
-    aws_info = 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
-    aws_file.close()
-    return google_info, azure_info, aws_info
+    elif platform == "AWS":
+        aws_info = ''
+        with open(backup_file_path, 'r') as aws_file:
+            s3.Object(upload_container[2], filename).put(Body = aws_file)
+            s3.Object(upload_container[2], filename).Acl().put(ACL='public-read')
+        aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
+        aws_file.close()
+        print aws_info
+        return aws_info
+
+
+# def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
+#     # Google
+#     google_info = ''
+#     with open(backup_file_path, 'r') as google_file:
+#         dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
+#         dst_uri.new_key().set_contents_from_file(google_file)
+#     google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+#     google_file.close()
+#     # Azure
+#     azure_info = ''
+#     azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
+#     azure_info = 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!'
+#     # AWS
+#     aws_info = ''
+#     with open(backup_file_path, 'r') as aws_file:
+#         s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
+#         s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
+#     aws_info = 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
+#     aws_file.close()
+#     return google_info, azure_info, aws_info
 
 def list_object(page, google_bucket_name, azure_container_name, aws_bucket_name, google_platform_check, azure_platform_check, aws_platform_check):
     # Google
