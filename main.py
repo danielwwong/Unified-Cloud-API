@@ -6,12 +6,12 @@ import time
 from scheduler import scheduler
 
 app = Flask(__name__)
-backup_file_folder = '/Users/danielwong/'
+backup_file_folder = 'backup/'
 basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
-scheduler = scheduler(num_workers=3)
+scheduler = scheduler(num_workers=1)
 custom_api.os.environ['BOTO_CONFIG'] = basedir + '/boto'
 
 
@@ -115,6 +115,69 @@ def upload():
         scheduler.input('upload', backup_file_path, f[x].filename, arg, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
     info = ''
     return info
+
+
+# @app.route('/upload/', methods = ['POST'])
+# def upload():
+#     # get selected upload information from frontend
+#     f = request.files.getlist('file_path[]')
+#     google_upload_bucket = request.form['google_upload_bucket']
+#     azure_upload_container = request.form['azure_upload_container']
+#     aws_upload_bucket = request.form['aws_upload_bucket']
+#     # parse information into 3 platforms
+#     google_upload_file = []
+#     azure_upload_file = []
+#     aws_upload_file = []
+
+
+
+#     print google_upload_bucket + azure_upload_container + aws_upload_bucket
+#     for x in range(len(f)):
+#         backup_file_path = backup_file_folder + f[x].filename
+#         f[x].save(backup_file_path)
+#         # encrypt file
+#         custom_api.encrypt_file(backup_file_path, username)
+#         g_size = len(google_upload_file)
+#         m_size = len(azure_upload_file)
+#         a_size = len(aws_upload_file)
+#         if (g_size < m_size and g_size < a_size):
+#             print "in Google"
+#             print f[x].filename
+#             google_upload_file.append(f[x].filename)
+#         # elif m_size <= a_size and m_size <= g_size:
+#         elif m_size < a_size:
+#             print "in Azure"
+#             print f[x].filename
+#             azure_upload_file.append(f[x].filename)
+#         else:
+#             print "in AWS"
+#             print f[x].filename
+#             aws_upload_file.append(f[x].filename)
+
+
+#     shared.upload_info = []
+#     # multithreading, one platform one thread
+#     t1 = threading.Thread(target = custom_api.upload_batch_object_2_Google, name = 'GoogleUploadThread', args = (backup_file_folder.encode("utf-8"), google_upload_file, 'Google', google_upload_bucket))
+#     t2 = threading.Thread(target = custom_api.upload_batch_object_2_Azure, name = 'AzureUploadThread', args = (backup_file_folder.encode("utf-8"), azure_upload_file, 'Azure', azure_upload_container))
+#     t3 = threading.Thread(target = custom_api.upload_batch_object_2_AWS, name = 'AWSUploadThread', args = ( backup_file_folder.encode("utf-8"), aws_upload_file, 'AWS', aws_upload_bucket))
+#     t1.start()
+#     t2.start()
+#     t3.start()
+#     t1.join()
+#     t2.join()
+#     t3.join()
+#     # decryption
+#     shared.download_info = ""
+#     for x in shared.upload_info:
+#         # file_path = temp_file_folder + download_file[x]
+#         # info = custom_api.decrypt_file(file_path, password, download_file[x], username)
+#         if x.startswith('S'):
+#             shared.download_info = shared.download_info + 'document.getElementById("' + x + '").innerHTML += "<i class=\'fa fa-unlock fa-fw\' style=\'font-size:24px;color:green\'></i>";'
+#         else:
+#             shared.download_info = shared.download_info + 'document.getElementById("' + x + '").innerHTML += "<i class=\'fa fa-lock fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+#     # zip
+#     return shared.download_info
+
 
 
 @app.route('/upload_ajax/')

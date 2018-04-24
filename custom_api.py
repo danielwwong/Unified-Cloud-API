@@ -228,38 +228,148 @@ def zip_file(folder_path):
         info = 'Failed to Zip: ' + str(e)
     return info
 
-
-def upload_object(backup_file_path, filename, platform, upload_container):
+def upload_batch_object(platform, backup_file_folder, filename_list, google_upload_bucket, azure_upload_container, aws_upload_bucket):
     # Google
     if platform == 'Google':
+        for filename in filename_list:
+            backup_file_path = backup_file_folder + filename
+            print backup_file_path
+            google_info = ''
+            with open(backup_file_path, 'r') as google_file:
+                dst_uri = boto.storage_uri(google_upload_bucket + '/' + filename, google_storage)
+                dst_uri.new_key().set_contents_from_file(google_file)
+            google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+            shared.upload_info.append(google_info)
+            google_file.close()
+    # Azure
+    elif platform == 'Azure':
+        for filename in filename_list:
+            backup_file_path = backup_file_folder + filename
+            print backup_file_path
+            azure_info = ''
+            azure.create_blob_from_path(azure_upload_container, filename, backup_file_path, content_settings = ContentSettings())
+            azure_info = 'Successfully Uploaded ' + azure_upload_container + '/' + filename + ' to Azure!'
+            shared.upload_info.append(azure_info)
+    # AWS
+    else:
+        for filename in filename_list:
+            backup_file_path = backup_file_folder + filename
+            print backup_file_path
+            aws_info = ''
+            with open(backup_file_path, 'r') as aws_file:
+                s3.Object(aws_upload_bucket, filename).put(Body = aws_file)
+                s3.Object(aws_upload_bucket, filename).Acl().put(ACL='public-read')
+            aws_info = 'Successfully Uploaded ' + aws_upload_bucket + '/' + filename + ' to AWS!'
+            shared.upload_info.append(aws_info)
+            aws_file.close()
+    # return google_info, azure_info, aws_info
+# def upload_batch_object(platform, backup_file_path, filename, upload_container):
+#     print "upload " +  filename  + " to " + platform
+#     # Google
+#     if platform == 'Google':
+#         upload_object_2_Google(backup_file_path, filename, platform, upload_container)
+#     # Azure
+#     elif platform == 'Azure':
+#         upload_object_2_Azure(backup_file_path, filename, platform, upload_container)
+#     # AWS
+#     else:
+#         upload_object_2_AWS(backup_file_path, filename, platform, upload_container)
+
+
+
+def upload_object(backup_file_path, filename, platform, upload_container_list):
+    print "upload " +  filename  + " to " + platform
+    # Google
+    if platform == 'Google':
+        upload_object_2_Google(backup_file_path, filename, platform, upload_container_list[0])
+    # Azure
+    elif platform == 'Azure':
+        upload_object_2_Azure(backup_file_path, filename, platform, upload_container_list[1])
+    # AWS
+    else:
+        upload_object_2_AWS(backup_file_path, filename, platform, upload_container_list[2])
+
+def upload_object_2_Google(backup_file_path, filename, platform, upload_container):
+    google_info = ''
+    with open(backup_file_path, 'r') as google_file:
+        dst_uri = boto.storage_uri(upload_container + '/' + filename, google_storage)
+        dst_uri.new_key().set_contents_from_file(google_file)
+    google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+    google_file.close()
+    print google_info
+    shared.upload_info.append(google_info)
+    task = {"info": google_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": dst_uri.bucket_name}
+    return task
+
+
+def upload_object_2_Azure(backup_file_path, filename, platform, upload_container):
+    azure_info = ''
+    azure.create_blob_from_path(upload_container, filename, backup_file_path, content_settings = ContentSettings())
+    azure_info = 'Successfully Uploaded ' + upload_container + '/' + filename + ' to Azure!'
+    print azure_info
+    shared.upload_info.append(azure_info)
+    task = {"info": azure_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[1]}
+    return task
+
+
+def upload_object_2_AWS(backup_file_path, filename, platform, upload_container):
+    aws_info = ''
+    print backup_file_path+" 2 aws " + upload_container
+    with open("./"+backup_file_path, 'r') as aws_file:
+        print "open"
+        print aws_file
+        s3.Object(upload_container, filename).put(Body = aws_file)
+        s3.Object(upload_container, filename).Acl().put(ACL='public-read')
+    aws_info = 'Successfully Uploaded ' + upload_container + '/' + filename + ' to AWS!'
+    aws_file.close()
+    print aws_info
+    shared.upload_info.append(aws_info)
+    task = {"info": aws_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[2]}
+    return task
+
+
+def upload_batch_object_2_Google(backup_file_folder, filenames, platform, upload_container):
+    for filename in filenames:
         google_info = ''
-        with open(backup_file_path, 'r') as google_file:
-            dst_uri = boto.storage_uri(upload_container[0] + '/' + filename, google_storage)
+        with open(backup_file_folder + filename, 'r') as google_file:
+            dst_uri = boto.storage_uri(upload_container + '/' + filename, google_storage)
             dst_uri.new_key().set_contents_from_file(google_file)
         google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
         google_file.close()
         print google_info
+        shared.upload_info.append(google_info)
         task = {"info": google_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": dst_uri.bucket_name}
-        return task
-    # Azure
-    elif platform == 'Azure':
+    return task
+
+
+def upload_batch_object_2_Azure(backup_file_folder, filenames, platform, upload_container):
+    for filename in filenames:
         azure_info = ''
-        azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
-        azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
+        azure.create_blob_from_path(upload_container, filename, backup_file_folder + filename, content_settings = ContentSettings())
+        azure_info = 'Successfully Uploaded ' + upload_container + '/' + filename + ' to Azure!'
         print azure_info
+        shared.upload_info.append(azure_info)
         task = {"info": azure_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[1]}
-        return task
-    # AWS
-    else:
+    return task
+
+
+def upload_batch_object_2_AWS(backup_file_folder, filenames, platform, upload_container):
+    for filename in filenames:
         aws_info = ''
-        with open(backup_file_path, 'r') as aws_file:
-            s3.Object(upload_container[2], filename).put(Body = aws_file)
-            s3.Object(upload_container[2], filename).Acl().put(ACL='public-read')
-        aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
+        print backup_file_folder + filename+" 2 aws " + upload_container
+        with open("./"+backup_file_folder + filename, 'r') as aws_file:
+            print "open"
+            print aws_file
+            s3.Object(upload_container, filename).put(Body = aws_file)
+            s3.Object(upload_container, filename).Acl().put(ACL='public-read')
+        aws_info = 'Successfully Uploaded ' + upload_container + '/' + filename + ' to AWS!'
         aws_file.close()
         print aws_info
+        shared.upload_info.append(aws_info)
         task = {"info": aws_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[2]}
-        return task
+    return task
+
+
 
 # def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
 #     # Google
