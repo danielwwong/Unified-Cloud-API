@@ -5,12 +5,14 @@ import custom_api
 import random
 import shared
 
+
 class TaskQueue(Queue.Queue):
-    def __init__(self, size, platform, num_workers=1 ):
+    def __init__(self, size, platform, monitor, num_workers=1):
         Queue.Queue.__init__(self, size)
         self.num_workers = num_workers
         self.start_workers()
         self.platform = platform
+        self.monitor = monitor
 
     def start_workers(self):
         for i in range(self.num_workers):
@@ -27,11 +29,10 @@ class worker(threading.Thread):
     def run(self):
         q = self.queue
         while 1:
-            print("thread%d %s: waiting for task" % (self.ident, self.name))
             try:
                 task = q.get(block=True, timeout=20)  # receive msg
                 result = self.execute(task)
-            
+
                 print("work finished!")
                 shared.upload_info.append(result)
                 q.task_done()  # finish
@@ -39,27 +40,35 @@ class worker(threading.Thread):
                 if res > 0:
                     print("There are still %d tasks to do" % (res))
             except Queue.Empty:
-#                print("Queue empty!")
-#                time.sleep(10)
+                #                print("Queue empty!")
+                #                time.sleep(10)
                 # self.thread_stop = True
                 continue
-            # print("task recv:%s ,task No:%d" % (task[0], task[1]))
-
-
 
     # suppose the interfaces are backup_file_path, filename, platform, upload_container
     # [google_upload_bucket, azure_upload_container, aws_upload_bucket]
     def execute(self, task): #
         mission = task["mission"]
-        print mission
-
         platform = self.queue.platform  # = task["platform"]
         result = ""
+        state = True
+        if platform == "Google":
+            state = self.queue.monitor.googleOn
+            print "Cannot access Google Cloud..."
+        elif platform == "Azure":
+            state = self.queue.monitor.azureOn
+            print "Cannot access Azure..."
+        else:
+            state = self.queue.monitor.awsOn
+            print "Cannot access AWS..."
+        if not state:
+            return result
+        print "start execute..."
         if mission == "upload" :
             result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
         elif  mission == "delete":
             result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
-        elif mission == "download": 
+        elif mission == "download":
             result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
         return result
 

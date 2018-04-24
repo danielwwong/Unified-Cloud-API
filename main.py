@@ -98,6 +98,26 @@ def list_bucket():
 #     info = google_info + '<br>' + azure_info + '<br>' + aws_info
 #     return info
 
+
+@app.route('/block_connection/', methods = ['GET', 'POST'])
+def blcok_connection():
+    platform = []
+    google_platform_check = request.form.get('google_platform')
+    azure_platform_check = request.form.get('azure_platform')
+    aws_platform_check = request.form.get('aws_platform')
+    if google_platform_check == "on":
+        platform.append("google")
+    if azure_platform_check == "on":
+        platform.append("azure")
+    if aws_platform_check == "on":
+        platform.append("aws")
+    if request.form.get('test') == "block":
+        scheduler.monitor.manual_block(platform)
+    else:
+        scheduler.monitor.manual_unblock(platform)
+    return render_template('block_connection.html')
+
+
 @app.route('/upload/', methods = ['POST'])
 def upload():
     f = request.files.getlist('file_path[]')
@@ -112,7 +132,7 @@ def upload():
         # encrypt file
         custom_api.encrypt_file(backup_file_path, username)
         # upload
-        scheduler.input('upload', backup_file_path, f[x].filename, arg, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+        scheduler.input('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
     info = ''
     return info
 

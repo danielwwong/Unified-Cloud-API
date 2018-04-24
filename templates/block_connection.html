@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block head %}
+		<title>Block Connection</title>
+{% endblock %}
+{% block block_connection %}w3-light-blue{% endblock %}
+{% block body %}
+		<h1>Block Connection/Container</h1>
+		<form action="/block_connection/" method="POST">
+			<input type="checkbox" name="google_platform" id="block_google"><label for="block_google">Google Cloud</label><br>
+			<input type="checkbox" name="azure_platform" id="block_azure"><label for="block_azure">Azure:</label><br>
+			<input type="checkbox" name="aws_platform" id="block_aws"><label for="block_aws">AWS:</label><br>
+			<input type="submit" name = "test" value="block">
+            <input type="submit" name = "test" value="unblock">
+		</form>
+		{% if status %}
+		<p>
+			{% if google %}
+			{{ google|safe }}<br>
+			{% endif %}
+			{% if azure %}
+			{{ azure|safe }}<br>
+			{% endif %}
+			{% if aws %}
+			{{ aws|safe }}<br>
+			{% endif %}
+		</p>
+		{% endif %}
+{% endblock %}
