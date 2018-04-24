@@ -2,7 +2,8 @@ from TaskQueue import TaskQueue
 import threading
 import time
 # import random
-from  monitor import Monitor
+from monitor import Monitor
+import custom_api
 
 class scheduler():
     def __init__(self, num_workers=3):
@@ -11,6 +12,8 @@ class scheduler():
         self.azure_queue = TaskQueue(-1,"Azure", self.monitor, num_workers=num_workers)
         self.amazon_queue = TaskQueue(-1,"Amazon", self.monitor, num_workers=num_workers)
         self.maxID = 1
+        self.start_reassignmet()
+
 
 
     def push_task(self, task):
@@ -52,27 +55,26 @@ class scheduler():
             self.monitor.connection_test("azure", 3, 1)
             self.monitor.connection_test("AWS", 3, 1)
             self.monitor.start_regular_monitor()
-        if self.monitor.googleOn | self.monitor.azureOn | self.monitor.awsOn:
-            print "some one work"
-        else:
-            print "noe one work"
         self.push_task(self.task2Json(mission, path, filename, bucket_name))
 
-# m_list = ["uplaod","download","delete"]
-# p_list = ["google","amazon","azure"]
-# path_list = [".//f:", "e:backup", "cd:could up"]
-# b_list = ["bucket_1", "bucket_2", "bucket_3"]
-#
-# s = scheduler()
-#
-# for i in range(3):
-#     s.push_task(s.task2Json(m_list[ random.randint(0, 2) ],path_list[random.randint(0, 2)],
-#                                   str(i)+".png" ,p_list[random.randint(0, 2)],b_list[random.randint(0, 2)]), block=True, timeout=None)
-#     s.push_task(s.task2Json(m_list[ random.randint(0, 2) ],path_list[random.randint(0, 2)],
-#                                   str(i)+".png" ,p_list[random.randint(0, 2)],b_list[random.randint(0, 2)]), block=True, timeout=None)
-#     s.push_task(s.task2Json(m_list[ random.randint(0, 2) ],path_list[random.randint(0, 2)],
-#                                   str(i)+".png" ,p_list[random.randint(0, 2)],b_list[random.randint(0, 2)]), block=True, timeout=None)
-#
-# print("***************leader:wait for finish!")
-# # q.join()  # wait for finishing
-# print("***************leader:all task finished!")
+    def reassignment(self):
+        while 1:
+            try:
+                task = custom_api.wait_list.pop(0)
+                task["platform"] = "AWS"
+                print ("Reassign task %s because of the failure of %s" % (task["id"], task["platform"]))
+                self.push_task(task)
+                print(self.amazon_queue.qsize())
+            except :
+                continue
+
+    def start_reassignmet(self):
+        t_reassign = threading.Thread(target=self.reassignment, name="reassignment")
+        t_reassign.daemon = True
+        t_reassign.start()
+
+    def test_reassignment(self, mission, path, filename, bucket_name):
+        for i in range(5):
+            newname = filename + str(i) + "abc"
+            task = self.task2Json(mission, path, newname, bucket_name)
+            self.amazon_queue.put(task)

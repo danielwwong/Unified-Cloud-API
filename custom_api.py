@@ -21,6 +21,8 @@ import zipfile
 import glob
 import time
 
+wait_list = []
+
 def initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key):
     global google_storage, local_file, google_header_values, azure, s3, s3_client
     # Google

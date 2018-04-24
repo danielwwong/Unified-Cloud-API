@@ -5,7 +5,7 @@ import time
 import os
 
 app = Flask(__name__)
-backup_file_folder = '/Users/danielwong/'
+backup_file_folder = '/Users/wangzetian/'
 basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
@@ -134,7 +134,10 @@ def upload():
         # encrypt file
         custom_api.encrypt_file(backup_file_path, username)
         # upload
-        scheduler.input('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+        if f[x].filename == "TestAssignment":
+            scheduler.test_reassignment('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+        else:
+            scheduler.input('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
     info = ''
     return info
 

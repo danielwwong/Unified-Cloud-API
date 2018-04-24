@@ -14,6 +14,7 @@ class TaskQueue(Queue.Queue):
         self.platform = platform
         self.monitor = monitor
 
+
     def start_workers(self):
         for i in range(self.num_workers):
             t = worker(self)
@@ -32,8 +33,6 @@ class worker(threading.Thread):
             try:
                 task = q.get(block=True, timeout=20)  # receive msg
                 result = self.execute(task)
-
-                print("work finished!")
                 shared.upload_info.append(result)
                 q.task_done()  # finish
                 res = q.qsize()  # size
@@ -62,10 +61,16 @@ class worker(threading.Thread):
             state = self.queue.monitor.awsOn
             print "Cannot access AWS..."
         if not state:
+            # If platform disconnected, these unexcuted tasks in the queue will bu push into rescheduler queue for future execution
+            custom_api.wait_list.append(task)
             return result
         print "start execute..."
         if mission == "upload" :
-            result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+            try:
+                result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+                print("work finished!")
+            except:
+                custom_api.wait_list.append(task)
         elif  mission == "delete":
             result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
         elif mission == "download":
@@ -76,34 +81,3 @@ class worker(threading.Thread):
     def stop(self):
         self.thread_stop = True
 
-# class maker():
-#     def __init__(self):
-#         self.maxID = 1
-
-#     def createMission( self, mission, path, filename, platform, bucket):
-#         self.maxID += 1
-#         task = {"id":self.maxID, "mission":mission, "path":path, "file_name":filename, "time_stamp":time.time(),"platform":platform, "bucket": bucket }
-#         return task
-
-# if __name__ == "__main__":
-#     q = TaskQueue(-1,platform="Google",num_workers = 3)
-#     # for i in range(3):
-#     #     worker_t = worker(q)
-#     #     worker_t.start()
-#     maker = maker()
-
-#     m_list = ["uplaod","download","delete"]
-#     p_list = ["google","amazon","azure"]
-#     path_list = [".//f:", "e:backup", "cd:could up"]
-#     b_list = ["bucket_1", "bucket_2", "bucket_3"]
-
-#     for i in range(3):
-#         q.put(maker.createMission(m_list[ random.randint(0, 2) ],path_list[random.randint(0, 2)], str(i)+".png" ,p_list[random.randint(0, 2)],b_list[random.randint(0, 2)]), block=True, timeout=None)
-#         q.put(maker.createMission(m_list[random.randint(0, 2)], path_list[random.randint(0, 2)], str(i) + ".png",
-#                                   p_list[random.randint(0, 2)], b_list[random.randint(0, 2)]), block=True, timeout=None)
-#         q.put(maker.createMission(m_list[random.randint(0, 2)], path_list[random.randint(0, 2)], str(i) + ".png",
-#                                   p_list[random.randint(0, 2)], b_list[random.randint(0, 2)]), block=True, timeout=None)
-
-#     print("***************leader:wait for finish!")
-#     q.join()  # wait for finishing
-#     print("***************leader:all task finished!")
