@@ -38,18 +38,19 @@ class worker(threading.Thread):
             # print("task recv:%s ,task No:%d" % (task[0], task[1]))
 
 
-            result = self.excute(task)
+            result = self.execute(task)
 
             print("work finished!")
-            shard.upload_info.append(result)
+            shared.upload_info.append(result)
             q.task_done()  # finish
             res = q.qsize()  # size
             if res > 0:
                 print("There are still %d tasks to do" % (res))
     # suppose the interfaces are backup_file_path, filename, platform, upload_container
     # [google_upload_bucket, azure_upload_container, aws_upload_bucket]
-    def excute(self, task): # 
+    def execute(self, task): #
         mission = task["mission"]
+        print mission
 
         platform = self.queue.platform  # = task["platform"]
         result = ""
