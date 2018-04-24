@@ -205,11 +205,15 @@ def download():
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-lock fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     # zip
     info = custom_api.zip_file(temp_file_folder)
+    flag = 0
     for x in range(len(platform)):
         if info.startswith('S'):
-            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-file-archive-o fa-fw\' style=\'font-size:24px;color:green\'></i>";' + 'var link = "/download_files/" + download_file;' + 'download();'
+            flag = 1
+            shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-file-archive-o fa-fw\' style=\'font-size:24px;color:green\'></i>";'
         else:
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
+    if flag == 1:
+        shared.download_info = shared.download_info + 'download();'
     return shared.download_info
 
 @app.route('/download_ajax/')
