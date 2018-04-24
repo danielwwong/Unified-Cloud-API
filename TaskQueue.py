@@ -42,7 +42,7 @@ class worker(threading.Thread):
 #                print("Queue empty!")
 #                time.sleep(10)
                 # self.thread_stop = True
-                pass
+                continue
             # print("task recv:%s ,task No:%d" % (task[0], task[1]))
 
 
