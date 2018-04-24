@@ -26,26 +26,27 @@ class worker(threading.Thread):
 
     def run(self):
         q = self.queue
-        while not self.thread_stop:
+        while 1:
             print("thread%d %s: waiting for task" % (self.ident, self.name))
             try:
                 task = q.get(block=True, timeout=20)  # receive msg
+                result = self.execute(task)
+            
+                print("work finished!")
+                shared.upload_info.append(result)
+                q.task_done()  # finish
+                res = q.qsize()  # size
+                if res > 0:
+                    print("There are still %d tasks to do" % (res))
             except Queue.Empty:
-                # print("Queue empty!")
-                time.sleep(10)
+#                print("Queue empty!")
+#                time.sleep(10)
                 # self.thread_stop = True
-                break
+                pass
             # print("task recv:%s ,task No:%d" % (task[0], task[1]))
 
 
-            result = self.execute(task)
 
-            print("work finished!")
-            shared.upload_info.append(result)
-            q.task_done()  # finish
-            res = q.qsize()  # size
-            if res > 0:
-                print("There are still %d tasks to do" % (res))
     # suppose the interfaces are backup_file_path, filename, platform, upload_container
     # [google_upload_bucket, azure_upload_container, aws_upload_bucket]
     def execute(self, task): #
