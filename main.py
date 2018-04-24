@@ -1,18 +1,15 @@
 from flask import Flask, render_template, request
 import shared
-import custom_api
 import threading
 import time
-from scheduler import scheduler
+import os
 
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
-basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
+basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
-scheduler = scheduler(num_workers=3)
-custom_api.os.environ['BOTO_CONFIG'] = basedir + '/boto'
 
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
@@ -31,6 +28,11 @@ def initialize():
         with open (basedir + '/boto', 'w') as boto_file:
             boto_file.write('[Credentials]\ngs_service_key_file = google_key.p12\ngs_service_client_id = ' + google_service_account + '\n[Boto]\nhttps_validate_certificates = True\n[GoogleCompute]\n[GSUtil]\ncontent_language = en\ndefault_project_id = ' + google_project_id + '\n[OAuth2]')
         boto_file.close()
+        global custom_api
+        import custom_api
+        global scheduler
+        from scheduler import scheduler
+        scheduler = scheduler(num_workers=3)
         backup_key_path = backup_google_key_folder + '/google_key.p12'
         google_key.save(backup_key_path)
         google_info, azure_info, aws_info = custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
@@ -38,12 +40,12 @@ def initialize():
             user_info = 'Failed to Initialize User!'
         else:
             if decrypt_password == '':
-                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, key_file_folder) + username + '.pem')):
+                if (os.path.isfile(os.path.join(basedir, key_file_folder) + username + '.pem')):
                     user_info = 'Successfully Initialized User!'
                 else:
                     user_info = 'Failed to Initalize User! Please Provide Password!'
             else:
-                if (custom_api.os.path.isfile(custom_api.os.path.join(basedir, key_file_folder) + username + '.pem')):
+                if (os.path.isfile(os.path.join(basedir, key_file_folder) + username + '.pem')):
                     user_info = 'User Existed!'
                 else:
                     # RSA public/private key generation
@@ -173,11 +175,11 @@ def list_object():
 @app.route('/download/', methods = ['POST'])
 def download():
     # clear temp folder
-    folder_files = [f for f in custom_api.os.listdir(temp_file_folder) if not f.startswith('.')]
+    folder_files = [f for f in os.listdir(temp_file_folder) if not f.startswith('.')]
     if len(folder_files) != 0:
         for file in folder_files:
             try:
-                custom_api.os.remove(temp_file_folder + file)
+                os.remove(temp_file_folder + file)
             except Exception:
                 pass
     # get selected download information from frontend
@@ -311,7 +313,7 @@ def delete_controller():
 
 #@app.route('/delete_private_key/', methods = ['POST'])
 #def delete_private_key():
-#    custom_api.os.remove(key_file_folder + 'rsa_private_key.bin')
+#    os.remove(key_file_folder + 'rsa_private_key.bin')
 #    info = 'Successfully Deleted Private Key in Server.'
 #    return info
 

@@ -1,7 +1,10 @@
+import os
+basedir = os.path.abspath(os.path.dirname(__file__))
+os.environ['BOTO_CONFIG'] = basedir + '/boto'
+
 import shared
 import boto
 import gcs_oauth2_boto_plugin
-import os
 import StringIO
 from azure.storage.blob import BlockBlobService
 from azure.storage.blob import PublicAccess
