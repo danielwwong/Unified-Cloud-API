@@ -1,7 +1,7 @@
 from TaskQueue import TaskQueue
 import threading
 import time
-# import random
+import random
 from monitor import Monitor
 import custom_api
 
@@ -30,7 +30,21 @@ class scheduler():
             a_size = self.amazon_queue.qsize()
         else:
             a_size = 100000
-        if g_size < m_size and g_size < a_size:
+        if g_size == m_size and m_size == a_size:
+            ran = random.randint(0,2)
+            if ran == 0:
+                task["platform"] = "Google"
+                self.google_queue.put(task)
+                print("choose google")
+            elif ran == 1:
+                task["platform"] = "Azure"
+                self.azure_queue.put(task)
+                print("choose azure")
+            elif ran == 2:
+                task["platform"] = "AWS"
+                self.amazon_queue.put(task)
+                print "choose aws"
+        elif g_size < m_size and g_size < a_size:
             task["platform"] = "Google"
             self.google_queue.put(task)
             print("choose google")
