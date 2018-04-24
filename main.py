@@ -8,13 +8,18 @@ from scheduler import scheduler
 app = Flask(__name__)
 backup_file_folder = '/Users/danielwong/'
 basedir = custom_api.os.path.abspath(custom_api.os.path.dirname(__file__))
+backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
 scheduler = scheduler(num_workers=3)
+custom_api.os.environ['BOTO_CONFIG'] = basedir + '/boto'
+
 
 @app.route('/initialize/', methods = ['GET', 'POST'])
 def initialize():
     if request.method == 'POST':
+        google_key = request.files['google_key']
+        google_service_account = request.form['google_service_account']
         google_project_id = request.form['google_project_id']
         azure_account_name = request.form['azure_account_name']
         azure_account_key = request.form['azure_account_key']
@@ -23,6 +28,11 @@ def initialize():
         global username
         username = request.form['username']
         decrypt_password = request.form['decrypt_password']
+        with open (basedir + '/boto', 'w') as boto_file:
+            boto_file.write('[Credentials]\ngs_service_key_file = google_key.p12\ngs_service_client_id = ' + google_service_account + '\n[Boto]\nhttps_validate_certificates = True\n[GoogleCompute]\n[GSUtil]\ncontent_language = en\ndefault_project_id = ' + google_project_id + '\n[OAuth2]')
+        boto_file.close()
+        backup_key_path = backup_google_key_folder + '/google_key.p12'
+        google_key.save(backup_key_path)
         google_info, azure_info, aws_info = custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
         if username == '':
             user_info = 'Failed to Initialize User!'
