@@ -1,6 +1,0 @@
-file_name, platform, wait_time, execute_time
-result (20).json, Azure, 0.0378921031952, 0.0554149150848
-result (13).json, Amazon, 0.00945806503296, 0.230165958405
-result (14).json, Amazon, 0.0171129703522, 0.488776922226
-result (12).json, Google, 0.0263209342957, 0.50213098526
-result (19).json, Google, 0.0412888526917, 0.499197006226
