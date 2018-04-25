@@ -65,9 +65,9 @@ class scheduler():
 
     def input(self, mission, path, filename, bucket_name):
         if self.maxID == 1:
-            self.monitor.connection_test("google", 3, 1)
-            self.monitor.connection_test("azure", 3, 1)
-            self.monitor.connection_test("AWS", 3, 1)
+            self.monitor.connection_test("google", 1, 1)
+            self.monitor.connection_test("azure", 1, 1)
+            self.monitor.connection_test("AWS", 1, 1)
             self.monitor.start_regular_monitor()
         self.push_task(self.task2Json(mission, path, filename, bucket_name))
 

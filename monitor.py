@@ -71,24 +71,24 @@ class Monitor(object):
     def manual_block(self, platform):
         if "google" in platform:
             self.blockGoogle = True
-            self.connection_test("google", 3, 1)
+            self.connection_test("google", 1, 1)
         if "azure" in platform:
             self.blockAzure = True
-            self.connection_test("azure", 3, 1)
+            self.connection_test("azure", 1, 1)
         if "aws" in platform:
             self.blockAWS = True
-            self.connection_test("AWS", 3, 1)
+            self.connection_test("AWS", 1, 1)
 
     def manual_unblock(self, platform):
         if "google" in platform:
             self.blockGoogle = False
-            self.connection_test("google", 3, 1)
+            self.connection_test("google", 1, 1)
         if "azure" in platform:
             self.blockAzure = False
-            self.connection_test("azure", 3, 1)
+            self.connection_test("azure", 1, 1)
         if "aws" in platform:
             self.blockAWS = False
-            self.connection_test("AWS", 3, 1)
+            self.connection_test("AWS", 1, 1)
 
     def start_regular_monitor(self):
         t_google = threading.Thread(target=self.connection_test, args=('google', 30, 60), name="Monitor_GoogleCloud")
