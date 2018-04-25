@@ -104,7 +104,7 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             if page == 'upload_page':
                 google_info = ''
                 for bucket in google_bucket_list:
-                    google_info = google_info + '<input type="radio" name="google_upload_bucket" id="g_' + str(bucket.name) + '" value="' + str(bucket.name) + '"><label for="g_' + str(bucket.name) + '">' + str(bucket.name) + '</label><br>'
+                    google_info = google_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_radio(document.getElementById(\'g_' + str(bucket.name) + '\'));">\n<td><input class="w3-radio" type="radio" name="google_upload_bucket" id="g_' + str(bucket.name) + '" value="' + str(bucket.name) + '" onclick="check_radio(this);"><label for="g_' + str(bucket.name) + '">' + str(bucket.name) + '</label></td>\n<td><i class="fa fa-google fa-fw" style="font-size:24px;color:#2196f3"></i></td>\n</tr>'
             elif page == 'download_page':
                 google_info = []
                 for bucket in google_bucket_list:
@@ -124,7 +124,7 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             if page == 'upload_page':
                 azure_info = ''
                 for container in container_list:
-                    azure_info = azure_info + '<input type="radio" name="azure_upload_container" id="m_' + str(container.name) + '" value="' + str(container.name) + '"><label for="m_' + str(container.name) + '">' + str(container.name) + '</label><br>'
+                    azure_info = azure_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_radio(document.getElementById(\'m_' + str(container.name) + '\'));">\n<td><input class="w3-radio" type="radio" name="azure_upload_container" id="m_' + str(container.name) + '" value="' + str(container.name) + '" onclick="check_radio(this);"><label for="m_' + str(container.name) + '">' + str(container.name) + '</label></td>\n<td><i class="fa fa-windows fa-fw" style="font-size:24px;color:#2196f3"></td>\n</tr>'
             elif page == 'download_page':
                 azure_info = []
                 for container in container_list:
@@ -145,7 +145,7 @@ def list_bucket(page, google_platform_check, azure_platform_check, aws_platform_
             if page == 'upload_page':
                 aws_info = ''
                 for item in buckets:
-                    aws_info = aws_info + '<input type="radio" name="aws_upload_bucket" id="a_' + str(item) + '" value="' + str(item) + '"><label for="a_' + str(item) + '">' + str(item) + '</label><br>'
+                    aws_info = aws_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_radio(document.getElementById(\'a_' + str(item) + '\'));">\n<td><input class="w3-radio" type="radio" name="aws_upload_bucket" id="a_' + str(item) + '" value="' + str(item) + '" onclick="check_radio(this);"><label for="a_' + str(item) + '">' + str(item) + '</label></td>\n<td><i class="fa fa-amazon fa-fw" style="font-size:24px;color:#2196f3"></td>\n</tr>'
             elif page == 'download_page':
                 aws_info = []
                 for item in buckets:

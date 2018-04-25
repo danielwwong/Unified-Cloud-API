@@ -68,55 +68,62 @@
 					document.getElementById("file_path_display").innerHTML = "<i class='fa fa-files-o fa-fw' style='font-size:36px;color:#2196f3'></i><br>" + choose_file_button.files.length + " files";
 				}
 			}
+			function check_radio(radio) {
+				radio.checked = true;
+			}
 		</script>
 {% endblock %}
 {% block upload_button %}w3-light-blue{% endblock %}
 {% block body %}
-		<h1>Upload</h1>
-		{% if google.startswith('N') or azure.startswith('N') or aws.startswith('N') %}
-		<p>
-		You should have at least 1 bucket/container in each platform.<br>
-		<a class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" href="/create_bucket/">Create Buckets/Containers</a>
-		</p>
-		{% else %}
-		<p>
-		Google Cloud Storage:<br>
-		{{ google|safe }}
-		Microsoft Azure:<br>
-		{{ azure|safe }}
-		Amazon S3:<br>
-		{{ aws|safe }}
-		<script type="text/javascript">
-			document.getElementsByName("google_upload_bucket")[0].checked = true;
-			document.getElementsByName("azure_upload_container")[0].checked = true;
-			document.getElementsByName("aws_upload_bucket")[0].checked = true;
-		</script>
-		</p>
-		<div class="w3-container w3-center w3-mycenter-small w3-light-gray w3-round-large w3-card-4 w3-section">
-			<div class="w3-my-col-container">
-				<div class="w3-my-col">
-					<p>
-						<b>Select Files: (Multiple Selection Supported)</b><br>
-					</p>
-					<p>
-						<input type="file" style="display:none" onchange="display_file_name(this);" name="upload_files" id="file_path" multiple><label class="w3-button w3-ripple w3-round-large" for="file_path" id="file_path_display"><i class="fa fa-files-o fa-fw" style="font-size:36px;color:#2196f3"></i></label>
-					</p>
-				</div>
-				<div class="w3-my-col">
-					<p>
-						<b>Click to Upload:</b><br>
-					</p>
-					<p>
-						<button type="button" class="w3-button w3-ripple w3-round-large" onclick="UploadFile();" id="upload_button"><i class="fa fa-cloud-upload fa-fw" style="font-size:36px;color:#2196f3"></i></button>
-					</p>
-				</div>
+	<div class="w3-container">
+		<table class="w3-table-all w3-card-4 w3-section w3-mycenter">
+			<thead>
+				<tr class="w3-blue">
+					<th>Bucket/Container</th>
+					<th>Platform</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% if google.startswith('N') or azure.startswith('N') or aws.startswith('N') %}
+				<td>You should have at least 1 bucket/container in each platform.</td>
+				<td><a class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" href="/create_bucket/">Create Buckets/Containers</a></td>
+				{% else %}
+					{{ google|safe }}
+					{{ azure|safe }}
+					{{ aws|safe }}
+				<script type="text/javascript">
+		 			document.getElementsByName("google_upload_bucket")[0].checked = true;
+		 			document.getElementsByName("azure_upload_container")[0].checked = true;
+			 		document.getElementsByName("aws_upload_bucket")[0].checked = true;
+				</script>
+				{% endif %}
+			</tbody>
+		</table>
+	</div>
+	<div class="w3-container w3-center w3-mycenter-small w3-light-gray w3-round-large w3-card-4 w3-margin-bottom">
+		<div class="w3-my-col-container">
+			<div class="w3-my-col">
+				<p>
+					<b>Select Files: (Multiple Selection Supported)</b><br>
+				</p>
+				<p>
+					<input type="file" style="display:none" onchange="display_file_name(this);" name="upload_files" id="file_path" multiple><label class="w3-button w3-ripple w3-round-large" for="file_path" id="file_path_display"><i class="fa fa-files-o fa-fw" style="font-size:36px;color:#2196f3"></i></label>
+				</p>
 			</div>
-			<p>
-				<b>Upload Progress to Server: (Not to Cloud Platforms)</b><br>
-			</p>
-			<progress id="progressBar" value="0" max="100"></progress><br>
-			<span id="percentage"></span>
+			<div class="w3-my-col">
+				<p>
+					<b>Click to Upload:</b><br>
+				</p>
+				<p>
+					<button type="button" class="w3-button w3-ripple w3-round-large" onclick="UploadFile();" id="upload_button"><i class="fa fa-cloud-upload fa-fw" style="font-size:36px;color:#2196f3"></i></button>
+				</p>
+			</div>
 		</div>
-		<div id="information"></div>
-		{% endif %}
+		<p>
+			<b>Upload Progress to Server: (Not to Cloud Platforms)</b><br>
+		</p>
+		<progress id="progressBar" value="0" max="100"></progress><br>
+		<span id="percentage"></span>
+	</div>
+	<div id="information"></div>
 {% endblock %}

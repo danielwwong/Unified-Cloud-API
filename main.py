@@ -5,7 +5,7 @@ import time
 import os
 
 app = Flask(__name__)
-backup_file_folder = '/Users/wangzetian/'
+backup_file_folder = '/Users/danielwong/'
 basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
@@ -256,7 +256,7 @@ def download_ajax():
             google_object_list, arg_2, arg_3 = custom_api.list_object(page, google_bucket_name[x], arg, arg, google_platform_check, arg, arg)
             if not isinstance(google_object_list, str):
                 for y in range(len(google_object_list)):
-                    google_info = google_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + google_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Google" id="' + google_object_list[y] + '" value="' + google_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + google_object_list[y] + '</td>\n<td>' + google_bucket_name[x] + '</td>\n<td>Google</td>\n<td name="statusTag" id="' + google_bucket_name[x] + '_' + google_object_list[y] + '_Google"></td>\n</tr>'# name is platform, value is source bucket, id is object name
+                    google_info = google_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + google_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Google" id="' + google_object_list[y] + '" value="' + google_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + google_object_list[y] + '</td>\n<td>' + google_bucket_name[x] + '</td>\n<td><i class="fa fa-google fa-fw" style="font-size:24px;color:#2196f3"></i></td>\n<td name="statusTag" id="' + google_bucket_name[x] + '_' + google_object_list[y] + '_Google"></td>\n</tr>'# name is platform, value is source bucket, id is object name
     # Azure
     azure_info = ''
     if not isinstance(azure_container_name, str):
@@ -264,7 +264,7 @@ def download_ajax():
             arg_2, azure_object_list, arg_3 = custom_api.list_object(page, arg, azure_container_name[x], arg, arg, azure_platform_check, arg)
             if not isinstance(azure_object_list, str):
                 for y in range(len(azure_object_list)):
-                    azure_info = azure_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + azure_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Azure" id="' + azure_object_list[y] + '" value="' + azure_container_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + azure_object_list[y] + '</td>\n<td>' + azure_container_name[x] + '</td>\n<td>Azure</td>\n<td name="statusTag" id="' + azure_container_name[x] + '_' + azure_object_list[y] + '_Azure"></td>\n</tr>'# name is platform, value is source bucket, id is object name
+                    azure_info = azure_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + azure_object_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="Azure" id="' + azure_object_list[y] + '" value="' + azure_container_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + azure_object_list[y] + '</td>\n<td>' + azure_container_name[x] + '</td>\n<td><i class="fa fa-windows fa-fw" style="font-size:24px;color:#2196f3"</td>\n<td name="statusTag" id="' + azure_container_name[x] + '_' + azure_object_list[y] + '_Azure"></td>\n</tr>'# name is platform, value is source bucket, id is object name
     # AWS
     aws_info = ''
     if not isinstance(aws_bucket_name, str):
@@ -272,7 +272,7 @@ def download_ajax():
             arg_2, arg_3, aws_objcet_list = custom_api.list_object(page, arg, arg, aws_bucket_name[x], arg, arg, aws_platform_check)
             if not isinstance(aws_objcet_list, str):
                 for y in range(len(aws_objcet_list)):
-                    aws_info = aws_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + aws_objcet_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="AWS" id="' + aws_objcet_list[y] + '" value="' + aws_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + aws_objcet_list[y] + '</td>\n<td>' + aws_bucket_name[x] + '</td>\n<td>AWS</td>\n<td name="statusTag" id="' + aws_bucket_name[x] + '_' + aws_objcet_list[y] + '_AWS"></td>\n</tr>'# name is platform, value is source bucket, id is object name
+                    aws_info = aws_info + '<tr class="w3-hover-light-blue w3-ripple" onclick="check_checkbox(document.getElementById(\'' + aws_objcet_list[y] + '\'));">\n<td><input class="w3-check" type="checkbox" name="AWS" id="' + aws_objcet_list[y] + '" value="' + aws_bucket_name[x] + '" onclick="check_checkbox(this);"></td>\n<td>' + aws_objcet_list[y] + '</td>\n<td>' + aws_bucket_name[x] + '</td>\n<td><i class="fa fa-amazon fa-fw" style="font-size:24px;color:#2196f3"></td>\n<td name="statusTag" id="' + aws_bucket_name[x] + '_' + aws_objcet_list[y] + '_AWS"></td>\n</tr>'# name is platform, value is source bucket, id is object name
     if len(google_info) == 0 and len(azure_info) == 0 and len(aws_info) == 0:
         google_info = 0
     return render_template('download_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
