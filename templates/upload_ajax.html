@@ -40,14 +40,6 @@
 				// XMLHttpRequest
 				var xhr = new XMLHttpRequest();
 				xhr.open("post", FileController, true);
-				xhr.onreadystatechange = function() {
-					if (this.readyState == 4 && this.status == 200) {
-						information.innerHTML = this.responseText;
-					}
-					else {
-						information.innerHTML = "Running...";
-					}
-				}
 				xhr.upload.addEventListener("progress", progressFunction, false);
 				xhr.send(form);
 			}
@@ -70,6 +62,20 @@
 			}
 			function check_radio(radio) {
 				radio.checked = true;
+			}
+			function upload_status() {
+				var FileController_2 = "/upload_status/";
+				var xhr_2 = new XMLHttpRequest();
+				xhr_2.open("post", FileController_2, true);
+				xhr_2.onreadystatechange = function() {
+					if (this.readyState == 4 && this.status == 200) {
+						if (this.responseText != '') {
+							document.getElementById("upload_history").style.display = "block";
+							document.getElementById("information").innerHTML = this.responseText;
+						}
+					}
+				}
+				xhr_2.send(null);
 			}
 		</script>
 {% endblock %}
@@ -125,5 +131,11 @@
 		<progress id="progressBar" value="0" max="100"></progress><br>
 		<span id="percentage"></span>
 	</div>
-	<div id="information"></div>
+	<script type="text/javascript">
+		setInterval(upload_status, 1000);
+	</script>
+	<div class="w3-panel w3-pale-green w3-card-4 w3-display-container w3-section w3-round-large w3-mycenter" style="display:none" id="upload_history">
+		<h3 class="w3-center"><b>Upload Status to Cloud Platforms</b></h3>
+		<p id="information"></p>
+	</div>
 {% endblock %}

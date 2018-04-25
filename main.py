@@ -100,6 +100,13 @@ def list_bucket():
 #     info = google_info + '<br>' + azure_info + '<br>' + aws_info
 #     return info
 
+@app.route('/upload_status/', methods = ['POST'])
+def upload_status():
+    info = ''
+    for information in shared.upload_info:
+        info = info + '<p><i class="fa fa-check-circle fa-fw" style="font-size:24px;color:green"></i>' + information['info'] + '</p>\n'
+    return info
+
 
 @app.route('/block_connection/', methods = ['GET', 'POST'])
 def blcok_connection():
