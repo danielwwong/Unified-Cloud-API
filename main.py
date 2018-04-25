@@ -12,7 +12,7 @@ temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
 
 
-@app.route('/initialize/', methods = ['GET', 'POST'])
+@app.route('/', methods = ['GET', 'POST'])
 def initialize():
     if request.method == 'POST':
         google_key = request.files['google_key']
