@@ -10,6 +10,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
+log_file_folder = 'static/log'
 
 
 @app.route('/', methods = ['GET', 'POST'])
@@ -104,6 +105,8 @@ def list_bucket():
 def upload_status():
     info = ''
     for information in shared.upload_info:
+        if information['info'] == "Need Reassign":
+            continue
         info = info + '<p><i class="fa fa-check-circle fa-fw" style="font-size:24px;color:green"></i>' + information['info'] + '</p>\n'
     return info
 
@@ -120,7 +123,7 @@ def blcok_connection():
         platform.append("azure")
     if aws_platform_check == "on":
         platform.append("aws")
-    if request.form.get('test') == "block":
+    if request.form.get('test') == "Block":
         scheduler.monitor.manual_block(platform)
     else:
         scheduler.monitor.manual_unblock(platform)
@@ -140,11 +143,12 @@ def upload():
         f[x].save(backup_file_path)
         # encrypt file
         custom_api.encrypt_file(backup_file_path, username)
+        upload_time = time.time()
         # upload
         if f[x].filename == "TestAssignment":
-            scheduler.test_reassignment('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+            scheduler.test_reassignment('upload', upload_time, backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
         else:
-            scheduler.input('upload', backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
+            scheduler.input('upload', upload_time, backup_file_path, f[x].filename, [google_upload_bucket, azure_upload_container, aws_upload_bucket])
     info = ''
     return info
 

@@ -234,7 +234,8 @@ def zip_file(folder_path):
     return info
 
 
-def upload_object(backup_file_path, filename, platform, upload_container):
+def upload_object(backup_file_path, filename, platform, upload_container, uploadtime):
+    start_time = time.time()
     # Google
     if platform == 'Google':
         google_info = ''
@@ -243,22 +244,28 @@ def upload_object(backup_file_path, filename, platform, upload_container):
             dst_uri.new_key().set_contents_from_file(google_file)
         google_file.close()
         google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+        end_time = time.time()
         try:
             os.remove(backup_file_path)
         except Exception:
             pass
-        task = {"info": google_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": dst_uri.bucket_name}
+        wait_time = start_time - uploadtime
+        execute_time = end_time - start_time
+        task = {"info": google_info, "mission": "upload", "file_name": filename, "wait_time": wait_time, "execute_time": execute_time, "platform": platform, "bucket": dst_uri.bucket_name}
         return task
     # Azure
     elif platform == 'Azure':
         azure_info = ''
         azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
         azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
+        end_time = time.time()
         try:
             os.remove(backup_file_path)
         except Exception:
             pass
-        task = {"info": azure_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[1]}
+        wait_time = start_time - uploadtime
+        execute_time = end_time - start_time
+        task = {"info": azure_info, "mission": "upload", "file_name": filename, "wait_time": wait_time, "execute_time": execute_time ,"platform": platform, "bucket": upload_container[1]}
         return task
     # AWS
     else:
@@ -268,11 +275,14 @@ def upload_object(backup_file_path, filename, platform, upload_container):
             s3.Object(upload_container[2], filename).Acl().put(ACL='public-read')
         aws_file.close()
         aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
+        end_time = time.time()
         try:
             os.remove(backup_file_path)
         except Exception:
             pass
-        task = {"info": aws_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[2]}
+        wait_time = start_time - uploadtime
+        execute_time = end_time - start_time
+        task = {"info": aws_info, "mission": "upload", "file_name": filename, "wait_time": wait_time, "execute_time": execute_time, "platform": platform, "bucket": upload_container[2]}
         return task
 
 # def upload_object(backup_file_path, filename, google_upload_bucket, azure_upload_container, aws_upload_bucket):
@@ -383,6 +393,8 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
     # AWS
     else:
         for x in range(len(file_source_bucket)):
+            if download_file[x] == "log":
+                store_log()
             try:
                 s3.Bucket(file_source_bucket[x]).download_file(download_file[x], destination_path + download_file[x])
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
@@ -414,3 +426,17 @@ def delete_object(platform, file_source_bucket, delete_file):
         except Exception as a_e:
             info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
     return info
+
+def store_log():
+    with open('static/log/log', 'wb') as log_output:
+        head = "file_name, platform, wait_time, execute_time\n"
+        log_output.write(head)
+        for i in shared.upload_info:
+            if i['info'] == "Need Reassign":
+                continue
+            s = i['file_name'] + ", " + i['platform'] + ", " + str(i['wait_time']) + ", " + str(i['execute_time']) + "\n"
+            log_output.write(s)
+        log_output.close()
+
+
+

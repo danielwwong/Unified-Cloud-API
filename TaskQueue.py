@@ -57,19 +57,25 @@ class worker(threading.Thread):
         elif platform == "Azure":
             state = self.queue.monitor.azureOn
             print "Cannot access Azure..."
+            print(state)
         else:
             state = self.queue.monitor.awsOn
             print "Cannot access AWS..."
+            print (state)
         if not state:
             # If platform disconnected, these unexcuted tasks in the queue will bu push into rescheduler queue for future execution
+            task_info = "Need Reassign"
+            result = {"info": task_info, "mission": "upload", "file_name": task["file_name"], "time_stamp": time.time(),"platform": platform, "bucket": task["bucket"]}
             custom_api.wait_list.append(task)
             return result
         print "start execute..."
-        if mission == "upload" :
+        if mission == "upload":
             try:
-                result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])
+                result = custom_api.upload_object(task["path"], task["file_name"],platform, task["bucket"], task["uploadtime"])
                 print("work finished!")
             except:
+                task_info = "Need Reassign"
+                result = {"info": task_info, "mission": "upload", "file_name": task["file_name"], "time_stamp": time.time(),"platform": platform, "bucket": task["bucket"]}
                 custom_api.wait_list.append(task)
         elif  mission == "delete":
             result = custom_api.upload_object(task["path"], task["file_name"],platform , task["bucket"])

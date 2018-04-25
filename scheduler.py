@@ -30,8 +30,11 @@ class scheduler():
             a_size = self.amazon_queue.qsize()
         else:
             a_size = 100000
-        if g_size == m_size and m_size == a_size:
-            ran = random.randint(0,2)
+        if g_size == m_size:
+            if m_size == a_size:
+                ran = random.randint(0, 2)
+            else:
+                ran = random.randint(0, 1)
             if ran == 0:
                 task["platform"] = "Google"
                 self.google_queue.put(task)
@@ -58,18 +61,21 @@ class scheduler():
             print "choose aws"
 
 
-    def task2Json(self, mission, path, filename, bucket):
+    def task2Json(self, upload_time, mission, path, filename, bucket):
         self.maxID += 1
-        task = {"id": self.maxID, "mission": mission, "path": path, "file_name": filename, "time_stamp": time.time(),"platform": " ", "bucket": bucket}
+        task = {"id": self.maxID, "mission": mission, "path": path, "file_name": filename, "time_stamp": time.time(),"platform": " ", "bucket": bucket, "uploadtime": upload_time}
         return task
 
-    def input(self, mission, path, filename, bucket_name):
+    def input(self, mission, upload_time,  path, filename, bucket_name):
         if self.maxID == 1:
+            t1 = time.time()
             self.monitor.connection_test("google", 1, 1)
             self.monitor.connection_test("azure", 1, 1)
             self.monitor.connection_test("AWS", 1, 1)
             self.monitor.start_regular_monitor()
-        self.push_task(self.task2Json(mission, path, filename, bucket_name))
+            t2 = time.time()
+            upload_time = upload_time + (t2 - t1)
+        self.push_task(self.task2Json(upload_time, mission, path, filename, bucket_name))
 
     def reassignment(self):
         start_time = time.time()
@@ -81,7 +87,6 @@ class scheduler():
                 task["platform"] = "AWS"
                 print ("Reassign task %s because of the failure of %s" % (task["id"], task["platform"]))
                 self.push_task(task)
-                print(self.amazon_queue.qsize())
                 time.sleep(10 - ((time.time() - start_time) % 10))
             except :
                 time.sleep(10 - ((time.time() - start_time) % 10))
@@ -94,8 +99,6 @@ class scheduler():
         t_reassign.daemon = True
         t_reassign.start()
 
-    def test_reassignment(self, mission, path, filename, bucket_name):
-        for i in range(5):
-            newname = filename + str(i) + "abc"
-            task = self.task2Json(mission, path, newname, bucket_name)
-            self.amazon_queue.put(task)
+    def test_reassignment(self, mission, upload_time, path, filename, bucket_name):
+        task = self.task2Json(upload_time, mission, path, filename, bucket_name)
+        self.amazon_queue.put(task)
