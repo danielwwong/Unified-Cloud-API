@@ -4,25 +4,33 @@
 {% endblock %}
 {% block block_connection %}w3-light-blue{% endblock %}
 {% block body %}
-		<h1>Block Connection/Container</h1>
-		<form action="/block_connection/" method="POST">
-			<input type="checkbox" name="google_platform" id="block_google"><label for="block_google">Google Cloud</label><br>
-			<input type="checkbox" name="azure_platform" id="block_azure"><label for="block_azure">Azure:</label><br>
-			<input type="checkbox" name="aws_platform" id="block_aws"><label for="block_aws">AWS:</label><br>
-			<input type="submit" name = "test" value="block">
-            <input type="submit" name = "test" value="unblock">
+	<div class="w3-card-4 w3-light-gray w3-round-large w3-section w3-mycenter-small">
+		<div class="w3-container w3-round-large w3-blue w3-center">
+			<h3><b>Block Connection/Container</b></h3>
+		</div>
+		<form class="w3-container" action="/block_connection/" method="POST">
+			<div class="w3-my-col-container">
+				<div class="w3-my-col">
+					<input class="w3-check" type="checkbox" name="google_platform" id="block_google">
+					<label for="block_google"><i class="fa fa-google fa-fw" style="font-size:24px;color:#2196f3"></i><b>Google</b></label>
+				</div>
+				<div class="w3-my-col">
+					<input class="w3-check" type="checkbox" name="azure_platform" id="block_azure">
+					<label for="block_azure"><i class="fa fa-windows fa-fw" style="font-size:24px;color:#2196f3"></i><b>Azure</b></label>
+				</div>
+				<div class="w3-my-col">
+					<input class="w3-check" type="checkbox" name="aws_platform" id="block_aws">
+					<label for="block_aws"><i class="fa fa-amazon fa-fw" style="font-size:24px;color:#2196f3"></i><b>AWS</b></label>
+				</div>
+			</div>
+			<div class="w3-my-col-container">
+				<div class="w3-my-col w3-center">
+					<input class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" type="submit" name="test" value="Block">
+				</div>
+				<div class="w3-my-col w3-center">
+					<input class="w3-button w3-blue w3-round-large w3-hover-light-blue w3-ripple" type="submit" name="test" value="Unblock">
+				</div>
+			</div>
 		</form>
-		{% if status %}
-		<p>
-			{% if google %}
-			{{ google|safe }}<br>
-			{% endif %}
-			{% if azure %}
-			{{ azure|safe }}<br>
-			{% endif %}
-			{% if aws %}
-			{{ aws|safe }}<br>
-			{% endif %}
-		</p>
-		{% endif %}
+	</div>
 {% endblock %}
