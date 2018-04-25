@@ -241,9 +241,12 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         with open(backup_file_path, 'r') as google_file:
             dst_uri = boto.storage_uri(upload_container[0] + '/' + filename, google_storage)
             dst_uri.new_key().set_contents_from_file(google_file)
-        google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
         google_file.close()
-        print google_info
+        google_info = 'Successfully Uploaded ' + dst_uri.bucket_name + '/' + dst_uri.object_name + ' to Google!'
+        try:
+            os.remove(backup_file_path)
+        except Exception:
+            pass
         task = {"info": google_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": dst_uri.bucket_name}
         return task
     # Azure
@@ -251,7 +254,10 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         azure_info = ''
         azure.create_blob_from_path(upload_container[1], filename, backup_file_path, content_settings = ContentSettings())
         azure_info = 'Successfully Uploaded ' + upload_container[1] + '/' + filename + ' to Azure!'
-        print azure_info
+        try:
+            os.remove(backup_file_path)
+        except Exception:
+            pass
         task = {"info": azure_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[1]}
         return task
     # AWS
@@ -260,9 +266,12 @@ def upload_object(backup_file_path, filename, platform, upload_container):
         with open(backup_file_path, 'r') as aws_file:
             s3.Object(upload_container[2], filename).put(Body = aws_file)
             s3.Object(upload_container[2], filename).Acl().put(ACL='public-read')
-        aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
         aws_file.close()
-        print aws_info
+        aws_info = 'Successfully Uploaded ' + upload_container[2] + '/' + filename + ' to AWS!'
+        try:
+            os.remove(backup_file_path)
+        except Exception:
+            pass
         task = {"info": aws_info, "mission": "upload", "file_name": filename, "time_stamp": time.time(),"platform": platform, "bucket": upload_container[2]}
         return task
 

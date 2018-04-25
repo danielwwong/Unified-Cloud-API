@@ -5,7 +5,7 @@ import time
 import os
 
 app = Flask(__name__)
-backup_file_folder = '/Users/danielwong/'
+backup_file_folder = 'static/upload_temp/'
 basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
