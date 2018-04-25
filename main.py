@@ -33,7 +33,7 @@ def initialize():
         import custom_api
         global scheduler
         from scheduler import scheduler
-        scheduler = scheduler(num_workers=3)
+        scheduler = scheduler(num_workers=5)
         backup_key_path = backup_google_key_folder + '/google_key.p12'
         google_key.save(backup_key_path)
         google_info, azure_info, aws_info = custom_api.initialize(google_project_id, azure_account_name, azure_account_key, s3_access_key_id, s3_secret_access_key)
@@ -188,6 +188,7 @@ def list_object():
 
 @app.route('/download/', methods = ['POST'])
 def download():
+    request_time = time.time()
     # clear temp folder
     folder_files = [f for f in os.listdir(temp_file_folder) if not f.startswith('.')]
     if len(folder_files) != 0:
@@ -250,6 +251,11 @@ def download():
             shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_' + platform[x] + '").innerHTML += "<i class=\'fa fa-exclamation-circle fa-fw\' style=\'font-size:24px;color:red\'></i>";'
     if flag == 1:
         shared.download_info = shared.download_info + 'download();'
+
+    info_head = ""
+    for x in platform:
+        info_head = info_head + x
+    shared.download_time.append(info_head + ": "+ str(time.time() - request_time))
     return shared.download_info
 
 @app.route('/download_ajax/')

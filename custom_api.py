@@ -394,7 +394,9 @@ def download_object(platform, file_source_bucket, destination_path, download_fil
     else:
         for x in range(len(file_source_bucket)):
             if download_file[x] == "log":
-                store_log()
+                store_upload_log()
+            if download_file[x] == "log_download":
+                store_download_log()
             try:
                 s3.Bucket(file_source_bucket[x]).download_file(download_file[x], destination_path + download_file[x])
                 shared.download_info = shared.download_info + 'document.getElementById("' + file_source_bucket[x] + '_' + download_file[x] + '_AWS").innerHTML = "<i class=\'fa fa-check-circle fa-fw\' style=\'font-size:24px;color:green\'></i>";'
@@ -427,7 +429,7 @@ def delete_object(platform, file_source_bucket, delete_file):
             info = 'Failed to Delete Object in AWS: ' + str(a_e) + '<br>'
     return info
 
-def store_log():
+def store_upload_log():
     with open('static/log/log', 'wb') as log_output:
         head = "file_name, platform, wait_time, execute_time\n"
         log_output.write(head)
@@ -437,6 +439,14 @@ def store_log():
             s = i['file_name'] + ", " + i['platform'] + ", " + str(i['wait_time']) + ", " + str(i['execute_time']) + "\n"
             log_output.write(s)
         log_output.close()
+
+def store_download_log():
+    with open('static/log/log_download', 'wb') as log_output:
+        for i in shared.download_time:
+            log_output.write(i)
+            log_output.write("\n")
+        log_output.close()
+
 
 
 

@@ -30,7 +30,7 @@ class scheduler():
             a_size = self.amazon_queue.qsize()
         else:
             a_size = 100000
-        if g_size == m_size:
+        if g_size < 100000 and g_size == m_size:
             if m_size == a_size:
                 ran = random.randint(0, 2)
             else:
