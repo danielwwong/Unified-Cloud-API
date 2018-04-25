@@ -16,7 +16,7 @@
 
 7. Install *gsutil*, *boto*, *boto3*, *botocore*, *gcs-oauth2-boto-plugin*, *azure-storage*, *azure-common* and *pycryptodome* packages by pip.
 
-### Note
+## Note
 1. If you want to change to another *Google Cloud Platform Account* or another *Google Cloud Project*, you may need to manually shutdown and restart the web application to renew the environment.
 
 2. It doesn't require restart if you only want to change *Microsoft Azure Account* or *Amazon Web Services Account*, you can simply go to *Initialize* tab and provide new credentials.
