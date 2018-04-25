@@ -10,7 +10,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 backup_google_key_folder = basedir
 temp_file_folder = 'static/temp/'
 key_file_folder = 'static/keys/'
-log_file_folder = 'static/log'
+log_file_folder = 'static/log/'
 
 
 @app.route('/', methods = ['GET', 'POST'])
