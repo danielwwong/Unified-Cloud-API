@@ -72,15 +72,22 @@ class scheduler():
         self.push_task(self.task2Json(mission, path, filename, bucket_name))
 
     def reassignment(self):
-        while 1:
+        start_time = time.time()
+        count = 0
+        while count < 60:
+            count += 1
             try:
                 task = custom_api.wait_list.pop(0)
                 task["platform"] = "AWS"
                 print ("Reassign task %s because of the failure of %s" % (task["id"], task["platform"]))
                 self.push_task(task)
                 print(self.amazon_queue.qsize())
+                time.sleep(10 - ((time.time() - start_time) % 10))
             except :
+                time.sleep(10 - ((time.time() - start_time) % 10))
                 continue
+
+
 
     def start_reassignmet(self):
         t_reassign = threading.Thread(target=self.reassignment, name="reassignment")
