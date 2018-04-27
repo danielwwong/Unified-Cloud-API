@@ -60,3 +60,7 @@
 4. UTF-8 may be supported in the future.
 
 5. More platforms may be supported in the future.
+
+## Others
+
+If the user encounter any problems when initializing, please contact <zhuang4@wpi.edu>.
