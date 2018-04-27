@@ -85,22 +85,6 @@ def list_bucket():
     else:
         return render_template('list_bucket.html')
 
-# @app.route('/upload/', methods = ['POST'])
-# def upload():
-#     f = request.files['file_path']
-#     google_upload_bucket = request.form['google_upload_bucket']
-#     azure_upload_container = request.form['azure_upload_container']
-#     aws_upload_bucket = request.form['aws_upload_bucket']
-#     # add a '.' in front of filename to hide the file in macOS
-#     backup_file_path = backup_file_folder + f.filename
-#     f.save(backup_file_path)
-#     # encrypt file
-#     custom_api.encrypt_file(backup_file_path, username)
-#     # upload
-#     google_info, azure_info, aws_info = custom_api.upload_object(backup_file_path, f.filename, google_upload_bucket, azure_upload_container, aws_upload_bucket)
-#     info = google_info + '<br>' + azure_info + '<br>' + aws_info
-#     return info
-
 @app.route('/upload_status/', methods = ['POST'])
 def upload_status():
     info = ''
@@ -161,14 +145,6 @@ def upload_ajax():
     page = 'upload_page'
     google_info, azure_info, aws_info = custom_api.list_bucket(page, google_platform_check, azure_platform_check, aws_platform_check)
     return render_template('upload_ajax.html', google = google_info, azure = azure_info, aws = aws_info)
-
-#@app.route('/download_keys/private/', methods = ['GET'])
-#def download_private_key():
-#    return app.send_static_file('temp/' + username + '.bin')
-#
-#@app.route('/download_keys/public/', methods = ['GET'])
-#def download_public_key():
-#    return app.send_static_file('temp/rsa_public_key.pem')
 
 @app.route('/list_object/', methods = ['GET', 'POST'])
 def list_object():
@@ -298,27 +274,6 @@ def download_ajax():
 def download_files():
     return app.send_static_file('temp/DownloadedFiles.zip')
 
-#@app.route('/delete/', methods = ['GET', 'POST'])
-#def delete():
-#    if request.method == 'POST':
-#        google_platform_check = request.form.get('google_platform')
-#        azure_platform_check = request.form.get('azure_platform')
-#        aws_platform_check = request.form.get('aws_platform')
-#        platform = [google_platform_check, azure_platform_check, aws_platform_check]
-#        google_bucket = request.form['google_bucket_name']
-#        azure_container = request.form['azure_container_name']
-#        aws_bucket = request.form['aws_bucket_name']
-#        file_source_bucket = [google_bucket, azure_container, aws_bucket]
-#        google_file = request.form['google_object_name']
-#        azure_file = request.form['azure_object_name']
-#        aws_file = request.form['aws_object_name']
-#        delete_file = [google_file, azure_file, aws_file]
-#        google_info, azure_info, aws_info = custom_api.delete_object(platform, file_source_bucket, delete_file)
-#        flag = 1
-#        return render_template('delete_object.html', status = flag, google = google_info, azure = azure_info, aws = aws_info)
-#    else:
-#        return render_template('delete_object.html')
-
 @app.route('/delete_controller/', methods = ['POST'])
 def delete_controller():
     # get selected download information from frontend
@@ -330,12 +285,6 @@ def delete_controller():
         custom_api.delete_object(platform[x], file_source_bucket[x], delete_file[x])
     info = 'Successfully Performed Deletion!'
     return info
-
-#@app.route('/delete_private_key/', methods = ['POST'])
-#def delete_private_key():
-#    os.remove(key_file_folder + 'rsa_private_key.bin')
-#    info = 'Successfully Deleted Private Key in Server.'
-#    return info
 
 if __name__ == '__main__':
     app.run(debug = True)
