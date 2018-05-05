@@ -63,4 +63,4 @@
 
 ## Others
 
-If the user encounter any problems when initializing, please contact <zhuang4@wpi.edu>.
+If the user encounters any problems when initializing, please contact <zhuang4@wpi.edu>.
